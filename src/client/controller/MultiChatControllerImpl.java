@@ -1,6 +1,11 @@
-package client;
+package client.controller;
 
+import client.model.MultiChatModel;
+import client.view.MultiChatView;
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MultiChatControllerImpl implements MultiChatController, Feature {
 
@@ -25,7 +30,7 @@ public class MultiChatControllerImpl implements MultiChatController, Feature {
       } else if (line.startsWith("SUBMITANOTHERNAME")) {
         String username = view.getName();
         model.sendText(username);
-      }else if (line.startsWith("NAMEACCEPTED")) {
+      } else if (line.startsWith("NAMEACCEPTED")) {
         view.setTitle("MultiChat - " + line.substring(13));
         view.setTextFieldEditable(true);
         view.display();
@@ -35,6 +40,12 @@ public class MultiChatControllerImpl implements MultiChatController, Feature {
         view.appendChatLog(line.substring(18) + "\n", "green");
       } else if (line.startsWith("MESSAGEUSERLEFT ")) {
         view.appendChatLog(line.substring(16) + "\n", "red");
+      } else if (line.startsWith("MESSAGEWELCOME ")) {
+        view.appendChatLog(line.substring(15) + "\n", "blue");
+      } else if (line.startsWith("ACTIVEUSERLIST ")) {
+        String[] arr = line.substring(15).split(",");
+        List<String> names = new ArrayList<>(Arrays.asList(arr));
+        view.setActiveUsers(names);
       }
     }
   }

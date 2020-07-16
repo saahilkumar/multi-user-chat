@@ -1,21 +1,22 @@
-package client;
+package client.view;
 
-import java.awt.BorderLayout;
+import client.controller.Feature;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.TextArea;
-import java.util.concurrent.Flow;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
+import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
@@ -23,8 +24,8 @@ import javax.swing.text.Document;
 
 public class MultiChatViewImpl extends JFrame implements MultiChatView {
   private JTextPane chatLog;
-  private JTextArea activeUsers;
-  private JTextArea activeServers;
+  private JTextPane activeUsers;
+  private JTextPane activeServers;
   private JTextArea chatField;
   private Feature feature;
   private StringBuilder log;
@@ -34,22 +35,28 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
 
     log = new StringBuilder();
 
-    activeUsers = new JTextArea(15, 10);
+    activeUsers = new JTextPane();
     activeUsers.setEditable(false);
-    activeUsers.setText("Active Users:");
+    activeUsers.setText("<h1>Active Users:</h1>");
+    activeUsers.setContentType("text/html");
+    activeUsers.setAutoscrolls(true);
+    activeUsers.setPreferredSize(new Dimension(100, 300));
     this.add(new JScrollPane(activeUsers));
 
     CenterPanel center = new CenterPanel();
     this.add(center);
 
-    activeServers = new JTextArea(15, 10);
+    activeServers = new JTextPane();
     activeServers.setEditable(false);
     activeServers.setText("Active Servers:");
+    activeServers.setPreferredSize(new Dimension(100, 300));
     this.add(new JScrollPane(activeServers));
 
 
 
     this.pack();
+
+//    setActiveUsers(new ArrayList<>(Arrays.asList("Saahil", "David", "Dog")));
   }
 
   @Override
@@ -82,6 +89,22 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
     String toAdd = "<span style=\"color:"+ color +"\">" + s + "</span><br>";
     log.append(toAdd);
     chatLog.setText(log.toString());
+    chatLog.setCaretPosition(chatLog.getDocument().getLength());
+  }
+
+  @Override
+  public void setActiveUsers(List<String> names) {
+    StringBuilder builder = new StringBuilder();
+    builder.append("<h1>Active Users:</h1>");
+    for(String name : names) {
+      builder.append(name + "<br>");
+    }
+    activeUsers.setText(builder.toString());
+  }
+
+  @Override
+  public void setActiveServers(List<String> servers) {
+
   }
 
   private void produceErrorMessage(String msg) {
@@ -97,7 +120,12 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
       chatLog.setContentType("text/html");
       chatLog.setEditable(false);
       chatLog.setPreferredSize(new Dimension(400, 300));
-      this.add(new JScrollPane(chatLog));
+//      chatLog.setAutoscrolls(true);
+//      chatLog.setBorder(new LineBorder(Color.MAGENTA, 1));
+
+      JScrollPane scrollChatLog = new JScrollPane(chatLog);
+      scrollChatLog.setBorder(new LineBorder(Color.BLUE, 1));
+      this.add(scrollChatLog);
 
       chatField = new JTextArea(3, 50);
       chatField.setLineWrap(true);
@@ -113,7 +141,10 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
       Document event = e.getDocument();
       try {
         if (event.getText(event.getLength() - 1, 1).equals("\n")) {
-          feature.sendTextOut(event.getText(0, event.getLength() - 1));
+          // if the message is not empty (not counting the newline)
+          if (event.getLength() > 1) {
+            feature.sendTextOut(event.getText(0, event.getLength() - 1));
+          }
           SwingUtilities.invokeLater(()->chatField.setText(""));
         }
       } catch(BadLocationException ble) {

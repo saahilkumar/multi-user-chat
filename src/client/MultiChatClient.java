@@ -1,7 +1,12 @@
 package client;
 
+import client.controller.MultiChatController;
+import client.controller.MultiChatControllerImpl;
+import client.model.MultiChatModel;
+import client.model.MultiChatModelImpl;
+import client.view.MultiChatView;
+import client.view.MultiChatViewImpl;
 import java.io.IOException;
-import javax.swing.JFrame;
 
 public class MultiChatClient {
   public static void main(String[] args) {
@@ -21,13 +26,5 @@ public class MultiChatClient {
     } catch(IOException ioe) {
       System.out.println("Failed to connect to Server Socket");
     }
-//    gui.setTitle("MultiChat");
-//    gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//    gui.setVisible(true);
-//    gui.setPreferredSize(new Dimension(300, 300));
-//    JTextField textField = new JTextField(50);
-//    gui.add(textField);
-//    textField.setVisible(true);
-//    gui.setVisible(true);
   }
 }

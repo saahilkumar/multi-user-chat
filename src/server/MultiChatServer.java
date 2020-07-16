@@ -120,12 +120,15 @@ public class MultiChatServer {
      */
     private void acceptAndProcessUsername() {
       out.println("NAMEACCEPTED " + name);
+      out.println("MESSAGEWELCOME Welcome to MultiChat " + name + "! Use /help if you need any assistance!");
       for (PrintWriter writer : outputWriters) {
         writer.println("MESSAGEUSERJOINED " + "[" + new Date().toString() + "] " +
             name + " has joined.");
       }
       outputWriters.add(out);
       System.out.println("[" + new Date().toString() + "] " + name + " has joined.");
+
+      updateActiveUsers();
     }
 
     //transmits user messages to other clients, handles user command requests as a well
@@ -161,6 +164,7 @@ public class MultiChatServer {
               + " has left");
         }
         out.println("Successfully left.");
+        updateActiveUsers();
       }
       try {
         clientSocket.close();
@@ -174,6 +178,17 @@ public class MultiChatServer {
       out.println("Type /quit to quit MultiChat.");
       out.println("Type /emotes to access a menu of emoticons.");
       out.println("Type /help to access this help menu.");
+    }
+
+    private void updateActiveUsers() {
+      for(PrintWriter writer : outputWriters) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("ACTIVEUSERLIST ");
+        for(String user : names) {
+          builder.append(user + ",");
+        }
+        writer.println(builder.toString());
+      }
     }
   }
 }

@@ -1,6 +1,8 @@
-package client;
+package client.view;
 
+import client.controller.Feature;
 import java.awt.Color;
+import java.util.List;
 
 public interface MultiChatView {
 
@@ -15,4 +17,8 @@ public interface MultiChatView {
   void appendChatLog(String s, String color);
 
   void setTitle(String s);
+
+  void setActiveUsers(List<String> names);
+
+  void setActiveServers(List<String> servers);
 }
