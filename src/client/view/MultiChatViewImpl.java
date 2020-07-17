@@ -2,20 +2,22 @@ package client.view;
 
 import client.controller.Feature;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -32,27 +34,29 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
   private JTextArea chatField;
   private Feature feature;
   private StringBuilder log;
+  private CountDownLatch latch;
 
   public MultiChatViewImpl() {
     this.setLayout(new FlowLayout());
+    CenterPanel center = new CenterPanel();
 
     log = new StringBuilder();
 
     activeUsers = new JTextPane();
     activeUsers.setEditable(false);
-    activeUsers.setText("<h2>Active Users:</h2>");
     activeUsers.setContentType("text/html");
+    activeUsers.setText("<h3>Active Users:</h3>");
     activeUsers.setAutoscrolls(true);
-    activeUsers.setPreferredSize(new Dimension(100, 300));
+    activeUsers.setPreferredSize(new Dimension(100, 375));
     this.add(new JScrollPane(activeUsers));
 
-    CenterPanel center = new CenterPanel();
     this.add(center);
 
     activeServers = new JTextPane();
     activeServers.setEditable(false);
-    activeServers.setText("Active Servers:");
-    activeServers.setPreferredSize(new Dimension(100, 300));
+    activeServers.setContentType("text/html");
+    activeServers.setText("<h3>Active Servers:</h3>");
+    activeServers.setPreferredSize(new Dimension(100, 375));
     this.add(new JScrollPane(activeServers));
 
 
@@ -60,17 +64,27 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
     this.pack();
 
 //    setActiveUsers(new ArrayList<>(Arrays.asList("Saahil", "David", "Dog")));
-    try {
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+//    try {
+//      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
   }
 
   @Override
-  public String getName() {
-    return JOptionPane.showInputDialog(this, "Choose a screen name:", "Screen name selection",
-        JOptionPane.PLAIN_MESSAGE);
+  public String getName(String prompt) {
+//    return JOptionPane.showInputDialog(this, "Choose a screen name:", "Screen name selection",
+//        JOptionPane.PLAIN_MESSAGE);
+    ScreenNameSelection namePane = new ScreenNameSelection(prompt);
+
+    latch = new CountDownLatch(1);
+    try {
+      latch.await();
+    } catch(InterruptedException ie) {
+      System.out.println("oof:" + ie.getMessage());
+    }
+
+    return namePane.getInput();
   }
 
   @Override
@@ -92,7 +106,7 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
       @Override
       public void windowClosing(WindowEvent event) {
         feature.sendTextOut("/quit");
-        System.exit(0);
+        System.exit(3);
       }
     });
 
@@ -100,19 +114,44 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
   }
 
   @Override
-  public void appendChatLog(String s, String color) {
+  public void appendChatLog(String s, String color, boolean hasDate) {
 //    String currentLog = this.chatLog.getText();
 //    this.chatLog.setText(currentLog + s + "\n");
+    if(hasDate) {
+      s = formatDate(s);
+    }
     String toAdd = "<span style=\"color:"+ color +"\">" + s + "</span><br>";
     log.append(toAdd);
     chatLog.setText(log.toString());
     chatLog.setCaretPosition(chatLog.getDocument().getLength());
   }
 
+  private String formatDate(String msg) {
+    String date = msg.substring(0, msg.indexOf("]") + 1);
+    String[] dateComponents = date.split(" ");
+    String month = dateComponents[1];
+    String day = dateComponents[2];
+    String time = dateComponents[3];
+    String timeZone = dateComponents[4];
+
+    StringBuilder builder = new StringBuilder();
+    builder.append("[");
+    builder.append(month);
+    builder.append(" ");
+    builder.append(day);
+    builder.append(" ");
+    builder.append(time);
+    builder.append(" ");
+    builder.append(timeZone);
+    builder.append("]");
+    builder.append(msg.substring(msg.indexOf("]") + 1));
+    return builder.toString();
+  }
+
   @Override
   public void setActiveUsers(List<String> names) {
     StringBuilder builder = new StringBuilder();
-    builder.append("<h2>Active Users:</h2>");
+    builder.append("<h3>Active Users:</h3>");
     for(String name : names) {
       builder.append(name + "<br>");
     }
@@ -166,6 +205,8 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
         }
       } catch(BadLocationException ble) {
         produceErrorMessage("Failure in capturing user input");
+        feature.sendTextOut("/quit");
+        MultiChatViewImpl.this.dispose();
       }
     }
 
@@ -177,6 +218,63 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
     @Override
     public void changedUpdate(DocumentEvent e) {
       return;
+    }
+  }
+
+  private class ScreenNameSelection extends JDialog {
+    private JLabel prompt;
+    private JTextField field;
+    private JButton submit;
+    private JButton cancel;
+
+    private ScreenNameSelection(String prompt) {
+      this.prompt = new JLabel(prompt);
+      this.field = new JTextField();
+      this.submit = new JButton("Ok");
+      this.cancel  = new JButton("Cancel");
+
+      this.setTitle("Screen Name Selection");
+//      this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+      getContentPane().setLayout(
+          new BoxLayout(getContentPane(), BoxLayout.PAGE_AXIS)
+      );
+      this.prompt.setAlignmentX(CENTER_ALIGNMENT);
+      this.add(this.prompt);
+
+      this.field.setPreferredSize(new Dimension(150, 20));
+      this.add(this.field);
+
+      JPanel buttonPanel = new JPanel();
+      buttonPanel.setLayout(new FlowLayout());
+      this.cancel.addActionListener(e -> cancel());
+      this.submit.addActionListener(e -> submitName());
+      buttonPanel.add(this.cancel);
+      buttonPanel.add(this.submit);
+
+      this.add(buttonPanel);
+      this.pack();
+      this.setVisible(true);
+      this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+      this.addWindowListener(new WindowAdapter() {
+        @Override
+        public void windowClosing(WindowEvent event) {
+          System.exit(2);
+        }
+      });
+    }
+
+    private String getInput() {
+      return this.field.getText();
+    }
+
+    private void submitName() {
+      latch.countDown();
+      this.dispose();
+    }
+
+    private void cancel() {
+      System.exit(1);
     }
   }
 }

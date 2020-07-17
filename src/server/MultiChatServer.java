@@ -101,11 +101,12 @@ public class MultiChatServer {
         out.println(submitNameProtocol);
         name = in.nextLine();
         if (name == null) {
+          System.out.println("name was null");
           userLeave();
           throw new IllegalArgumentException("Supplied a null name.");
         }
         synchronized (names) {
-          if (!name.isBlank() && !names.contains(name)) {
+          if (!name.isBlank() && !names.contains(name) && !name.contains(",")) {
             names.add(name);
             break;
           }
@@ -139,7 +140,7 @@ public class MultiChatServer {
           userLeave();
           return;
         }
-        if (input.toLowerCase().startsWith("/help")) {
+        else if (input.toLowerCase().startsWith("/help")) {
           printHelpMessage();
         } else if (input.toLowerCase().startsWith("/emotes")) {
           //TODO: add emote handling
@@ -175,9 +176,9 @@ public class MultiChatServer {
 
     //prints a help menu with commands to use in MultiChat.
     private void printHelpMessage() {
-      out.println("Type /quit to quit MultiChat.");
-      out.println("Type /emotes to access a menu of emoticons.");
-      out.println("Type /help to access this help menu.");
+      out.println("MESSAGEHELP Type /quit to quit MultiChat.");
+      out.println("MESSAGEHELP Type /emotes to access a menu of emoticons.");
+      out.println("MESSAGEHELP Type /help to access this help menu.");
     }
 
     private void updateActiveUsers() {
