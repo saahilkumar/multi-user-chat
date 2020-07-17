@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +18,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -37,7 +40,7 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
 
     activeUsers = new JTextPane();
     activeUsers.setEditable(false);
-    activeUsers.setText("<h1>Active Users:</h1>");
+    activeUsers.setText("<h2>Active Users:</h2>");
     activeUsers.setContentType("text/html");
     activeUsers.setAutoscrolls(true);
     activeUsers.setPreferredSize(new Dimension(100, 300));
@@ -57,6 +60,11 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
     this.pack();
 
 //    setActiveUsers(new ArrayList<>(Arrays.asList("Saahil", "David", "Dog")));
+    try {
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   @Override
@@ -78,7 +86,16 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
 
   @Override
   public void display() {
-    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    // if you close the window, it tells the server that you're saying /quit
+    this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    this.addWindowListener(new WindowAdapter() {
+      @Override
+      public void windowClosing(WindowEvent event) {
+        feature.sendTextOut("/quit");
+        System.exit(0);
+      }
+    });
+
     this.setVisible(true);
   }
 
@@ -95,7 +112,7 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
   @Override
   public void setActiveUsers(List<String> names) {
     StringBuilder builder = new StringBuilder();
-    builder.append("<h1>Active Users:</h1>");
+    builder.append("<h2>Active Users:</h2>");
     for(String name : names) {
       builder.append(name + "<br>");
     }
