@@ -4,6 +4,9 @@ import client.controller.Feature;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
@@ -20,12 +23,12 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import java.awt.event.FocusListener;
 
 public class MultiChatViewImpl extends JFrame implements MultiChatView {
   private JTextPane chatLog;
@@ -63,18 +66,11 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
 
     this.pack();
 
-//    setActiveUsers(new ArrayList<>(Arrays.asList("Saahil", "David", "Dog")));
-//    try {
-//      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-//    } catch (Exception e) {
-//      e.printStackTrace();
-//    }
+    this.setResizable(false);
   }
 
   @Override
   public String getName(String prompt) {
-//    return JOptionPane.showInputDialog(this, "Choose a screen name:", "Screen name selection",
-//        JOptionPane.PLAIN_MESSAGE);
     ScreenNameSelection namePane = new ScreenNameSelection(prompt);
 
     latch = new CountDownLatch(1);
@@ -84,7 +80,14 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
       System.out.println("oof:" + ie.getMessage());
     }
 
-    return namePane.getInput();
+    this.setTitle("MultiChat - " + namePane.getInput());
+    return removeHtml(namePane.getInput());
+  }
+
+  private String removeHtml(String str) {
+    str = str.replaceAll("<", "&lt;");
+    str = str.replaceAll(">", "&gt;");
+    return str;
   }
 
   @Override
@@ -167,6 +170,9 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
     JOptionPane.showMessageDialog(this, msg, "Error", JOptionPane.ERROR_MESSAGE);
   }
 
+  /**
+   * A class representing the center panel storing the chat log and chat field.
+   */
   private class CenterPanel extends JPanel {
 
     private CenterPanel() {
@@ -184,12 +190,17 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
       this.add(scrollChatLog);
 
       chatField = new JTextArea(3, 50);
+      chatField.setText("Type here...");
       chatField.setLineWrap(true);
       chatField.setAutoscrolls(true);
+      chatField.addFocusListener(new JTextAreaListener());
       this.add(new JScrollPane(chatField));
     }
   }
 
+  /**
+   * A class to listen to the chatLog that stores everyone's messages.
+   */
   private class TextAreaListener implements DocumentListener {
 
     @Override
@@ -199,7 +210,7 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
         if (event.getText(event.getLength() - 1, 1).equals("\n")) {
           // if the message is not empty (not counting the newline)
           if (event.getLength() > 1) {
-            feature.sendTextOut(event.getText(0, event.getLength() - 1));
+            feature.sendTextOut(removeHtml(event.getText(0, event.getLength() - 1)));
           }
           SwingUtilities.invokeLater(()->chatField.setText(""));
         }
@@ -221,6 +232,9 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
     }
   }
 
+  /**
+   * A class representing a JDialog that asks the user for their screen name.
+   */
   private class ScreenNameSelection extends JDialog {
     private JLabel prompt;
     private JTextField field;
@@ -275,6 +289,26 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
 
     private void cancel() {
       System.exit(1);
+    }
+  }
+
+  /**
+   * A FocusListener to check whether or not the user is focusing on the chat field.
+   */
+  private class JTextAreaListener implements FocusListener {
+
+    boolean startedTyping = false;
+    @Override
+    public void focusGained(FocusEvent e) {
+      if(!startedTyping) {
+        chatField.setText("");
+        startedTyping = true;
+      }
+    }
+
+    @Override
+    public void focusLost(FocusEvent e) {
+      return;
     }
   }
 }

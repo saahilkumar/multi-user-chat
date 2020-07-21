@@ -15,11 +15,9 @@ public class MultiChatClient {
       return;
     }
 
-//    MultiChatView view = new MultiChatViewImpl();
-//    view.display();
     try {
-      MultiChatView view = new MultiChatViewImpl();
       MultiChatModel model = new MultiChatModelImpl(args[0]);
+      MultiChatView view = new MultiChatViewImpl();
       MultiChatController controller = new MultiChatControllerImpl(model, view);
 
       controller.run();

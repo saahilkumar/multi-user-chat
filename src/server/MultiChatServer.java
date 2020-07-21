@@ -36,19 +36,29 @@ public class MultiChatServer {
   public static void main(String[] args) throws IOException, IllegalArgumentException,
       NumberFormatException {
     int possibleAmountOfClients;
+    int portNum;
+//    if (args.length == 1) {
+//      possibleAmountOfClients = Integer.parseInt(args[1]);
+//    } else if (args.length == 0) {
+//      possibleAmountOfClients = 30;
+//    } else {
+//      throw new IllegalArgumentException("Supplied more than 1 argument. Please enter zero or one "
+//          + "integer only for number of desired clients.");
+//    }
     if (args.length == 1) {
-      possibleAmountOfClients = Integer.parseInt(args[0]);
-    } else if (args.length == 0) {
       possibleAmountOfClients = 30;
+      portNum = Integer.parseInt(args[0]);
+    } else if (args.length == 2) {
+      portNum = Integer.parseInt(args[0]);
+      possibleAmountOfClients = Integer.parseInt(args[1]);
     } else {
-      throw new IllegalArgumentException("Supplied more than 1 argument. Please enter zero or one "
-          + "integer only for number of desired clients.");
+      throw new IllegalArgumentException("Supply the right amount of arguments dumbass");
     }
     System.out.println("MultiChat Server is running...");
     ExecutorService pool = Executors.newFixedThreadPool(possibleAmountOfClients);
-    try (ServerSocket server = new ServerSocket(59090)) {
+    try (ServerSocket server = new ServerSocket(portNum)) {
       while (true) {
-        pool.execute(new Task(server.accept()));
+        pool.execute(new Task(server.accept(), args[0]));
       }
     }
   }
@@ -64,10 +74,12 @@ public class MultiChatServer {
     private final Socket clientSocket; //the socket of the client connection
     private Scanner in; //the input of the client
     private PrintWriter out; //the output to the client
+    private String portNum;
 
     //Captures the client's socket as a field.
-    private Task(Socket clientSocket) {
+    private Task(Socket clientSocket, String portNum) {
       this.clientSocket = clientSocket;
+      this.portNum = portNum;
     }
 
     @Override
@@ -121,7 +133,7 @@ public class MultiChatServer {
      */
     private void acceptAndProcessUsername() {
       out.println("NAMEACCEPTED " + name);
-      out.println("MESSAGEWELCOME Welcome to MultiChat " + name + "! Use /help if you need any assistance!");
+      out.println("MESSAGEWELCOME Welcome to MultiChat Room " + portNum + " " + name + "! Use /help if you need any assistance!");
       for (PrintWriter writer : outputWriters) {
         writer.println("MESSAGEUSERJOINED " + "[" + new Date().toString() + "] " +
             name + " has joined.");
