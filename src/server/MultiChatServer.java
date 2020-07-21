@@ -16,6 +16,8 @@ import java.util.concurrent.Executors;
  */
 public class MultiChatServer {
 
+  // holds the ports of all the active servers
+  private static HashSet<String> serverNames = new HashSet<>();
   //holds the names of active clients
   private static HashSet<String> names = new HashSet<>();
 
@@ -55,10 +57,49 @@ public class MultiChatServer {
       throw new IllegalArgumentException("Supply the right amount of arguments dumbass");
     }
     System.out.println("MultiChat Server is running...");
+
+    Thread masterServerCommunication = new Thread(new RunServerCommunication(args[0]));
+    masterServerCommunication.start();
+
     ExecutorService pool = Executors.newFixedThreadPool(possibleAmountOfClients);
     try (ServerSocket server = new ServerSocket(portNum)) {
       while (true) {
         pool.execute(new Task(server.accept(), args[0]));
+      }
+    }
+  }
+
+  /**
+   * Communication with Master Server.
+   */
+  private static class RunServerCommunication implements Runnable {
+
+    private String portNumber;
+
+    private RunServerCommunication(String portNumber) {
+      this.portNumber = portNumber;
+    }
+
+    @Override
+    public void run() {
+      try {
+        Socket socketToMasterServer = new Socket("localhost", 50000);
+        Scanner serverIn = new Scanner(socketToMasterServer.getInputStream());
+        PrintWriter serverOut = new PrintWriter(socketToMasterServer.getOutputStream(), true);
+        serverOut.println("Server " + portNumber);
+        while(serverIn.hasNextLine()) {
+          String serverList = serverIn.nextLine();
+          serverList = serverList.substring(17);
+          System.out.println(serverList);
+          String[] activeServers = serverList.split(", ");
+          serverNames.clear();
+          for (String server : activeServers) {
+            serverNames.add(server);
+          }
+          updateServerList();
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
       }
     }
   }
@@ -142,6 +183,7 @@ public class MultiChatServer {
       System.out.println("[" + new Date().toString() + "] " + name + " has joined.");
 
       updateActiveUsers();
+      updateServerList();
     }
 
     //transmits user messages to other clients, handles user command requests as a well
@@ -202,6 +244,18 @@ public class MultiChatServer {
         }
         writer.println(builder.toString());
       }
+    }
+  }
+
+  private static void updateServerList() {
+    for(PrintWriter out : outputWriters) {
+      StringBuilder serverList = new StringBuilder();
+      serverList.append("ACTIVESERVERLIST ");
+      for(String serverName : serverNames) {
+        serverList.append(serverName + ",");
+      }
+
+      out.println(serverList.toString());
     }
   }
 }

@@ -14,9 +14,9 @@ public class MultiChatModelImpl implements MultiChatModel {
   private PrintWriter out;
 
 
-  public MultiChatModelImpl(String ipAddress) throws IOException {
+  public MultiChatModelImpl(String ipAddress, int portNum) throws IOException {
     this.ipAddress = ipAddress;
-    socket = new Socket(this.ipAddress, 59090);
+    socket = new Socket(this.ipAddress, portNum);
     in = new Scanner(socket.getInputStream());
     out = new PrintWriter(socket.getOutputStream(), true);
   }

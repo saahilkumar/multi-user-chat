@@ -163,7 +163,12 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
 
   @Override
   public void setActiveServers(List<String> servers) {
-
+    StringBuilder builder = new StringBuilder();
+    builder.append("<h3>Active Servers:</h3>");
+    for(String server : servers) {
+      builder.append(server + "<br>");
+    }
+    activeServers.setText(builder.toString());
   }
 
   private void produceErrorMessage(String msg) {

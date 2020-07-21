@@ -10,13 +10,13 @@ import java.io.IOException;
 
 public class MultiChatClient {
   public static void main(String[] args) {
-    if(args.length != 1) {
-      System.out.println("Pass the server IP as the sole input");
-      return;
-    }
+//    if(args.length != 1) {
+//      System.out.println("Pass the server IP as the sole input");
+//      return;
+//    }
 
     try {
-      MultiChatModel model = new MultiChatModelImpl(args[0]);
+      MultiChatModel model = new MultiChatModelImpl(args[0], Integer.parseInt(args[1]));
       MultiChatView view = new MultiChatViewImpl();
       MultiChatController controller = new MultiChatControllerImpl(model, view);
 
