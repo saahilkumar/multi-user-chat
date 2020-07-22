@@ -41,7 +41,6 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
   private Feature feature;
   private StringBuilder log;
   private CountDownLatch latch;
-  private Map<String, String> emotes;
 
   public MultiChatViewImpl() {
     this.setLayout(new FlowLayout());
@@ -72,14 +71,14 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
 
     this.setResizable(false);
 
-    emotes = new HashMap<>();
-    emotes.put("&lt;3", "heart_emoji.png");
-    emotes.put(":\\)", "smiley.png");
-    emotes.put(":\\(", "frowny.png");
-    emotes.put(":/", "confused.png");
-    emotes.put(":D", "excited.png");
-    emotes.put("D:", "anguish.png");
-    emotes.put(":p", "tongue.png");
+//    emotes = new HashMap<>();
+//    emotes.put("&lt;3", "heart_emoji.png");
+//    emotes.put(":\\)", "smiley.png");
+//    emotes.put(":\\(", "frowny.png");
+//    emotes.put(":/", "confused.png");
+//    emotes.put(":D", "excited.png");
+//    emotes.put("D:", "anguish.png");
+//    emotes.put(":p", "tongue.png");
   }
 
   @Override
@@ -137,26 +136,35 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
     if(hasDate) {
       s = formatDate(s);
     }
-    String toAdd = "<span style=\"color:"+ color +"\">" + s + "</span><br>";
+    s = convertEmote(s);
+    String toAdd = "<span style=\"color:"+ color +"\">" + s + " </span><br>";
 //    toAdd = convertEmote(toAdd);
-    log.append(convertEmote(toAdd));
+    log.append(toAdd);
     chatLog.setText(log.toString());
     chatLog.setCaretPosition(chatLog.getDocument().getLength());
   }
 
   private String convertEmote(String msg) {
-    for(String emoteName : emotes.keySet()) {
-      msg = msg.replaceAll(emoteName,
-          "<img src = \"" + MultiChatServer.class.getClassLoader()
-              .getResource("resources/images/" + emotes.get(emoteName)).toString() + "\"" +
-              " alt = \"error\" width = \"20\" height = \"20\">");
-    }
-//    String convertedMessage = msg.replaceAll("&lt;3",
-//        "<img src = \"" + MultiChatServer.class.getClassLoader()
-//            .getResource("resources/images/heart_emoji.png").toString() + "\"" +
-//            " alt = \"&lt;3\" width = \"20\" height = \"20\">");
+    StringBuilder builder = new StringBuilder();
 
-    return msg;
+    // split message by space
+    String[] words = msg.split(" ");
+
+    for(String word : words) {
+      // if the word equals an emoji name (ex. <3) then replace it with html image code
+      if(MultiChatView.EMOTES.containsKey(word.trim())) {
+        builder.append("<img src = \"" + MultiChatServer.class.getClassLoader()
+              .getResource("resources/images/" + MultiChatView.EMOTES.get(word.trim())).toString() + "\"" +
+              " alt = \"error\" width = \"20\" height = \"20\">");
+      } else {
+        builder.append(word);
+      }
+
+      // add the space back in (got removed when splitting)
+      builder.append(" ");
+    }
+
+    return builder.toString();
   }
 
   private String formatDate(String msg) {
