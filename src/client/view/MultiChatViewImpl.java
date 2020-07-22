@@ -25,6 +25,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -43,6 +45,13 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
   private CountDownLatch latch;
 
   public MultiChatViewImpl() {
+
+    try {
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+
     this.setLayout(new FlowLayout());
     CenterPanel center = new CenterPanel();
 
@@ -94,7 +103,8 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
     }
 
     this.setTitle("MultiChat - " + namePane.getInput());
-    return removeHtml(namePane.getInput());
+//    return removeHtml(namePane.getInput());
+    return namePane.getInput();
   }
 
   private String removeHtml(String str) {
@@ -131,14 +141,20 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
 
   @Override
   public void appendChatLog(String s, String color, boolean hasDate) {
-//    String currentLog = this.chatLog.getText();
-//    this.chatLog.setText(currentLog + s + "\n");
+//    if(hasDate) {
+//      s = formatDate(s);
+//    }
+//    s = convertEmote(s);
+//    String toAdd = "<span style=\"color:"+ color +"\">" + s + " </span><br>";
+//    log.append(toAdd);
+//    chatLog.setText(log.toString());
+//    chatLog.setCaretPosition(chatLog.getDocument().getLength());
+    String toAdd = "";
     if(hasDate) {
-      s = formatDate(s);
+      toAdd = "<span style=\"color:"+ color +"\">" + convertEmote(removeHtml(formatDate(s))) + " </span><br>";
+    } else {
+      toAdd = "<span style=\"color:"+ color +"\">" + convertEmote(removeHtml(s)) + " </span><br>";
     }
-    s = convertEmote(s);
-    String toAdd = "<span style=\"color:"+ color +"\">" + s + " </span><br>";
-//    toAdd = convertEmote(toAdd);
     log.append(toAdd);
     chatLog.setText(log.toString());
     chatLog.setCaretPosition(chatLog.getDocument().getLength());
@@ -198,7 +214,7 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
     StringBuilder builder = new StringBuilder();
     builder.append("<h3>Active Users:</h3>");
     for(String name : names) {
-      builder.append(name + "<br>");
+      builder.append(removeHtml(name) + "<br>");
     }
     activeUsers.setText(builder.toString());
   }
@@ -258,7 +274,8 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
         if (event.getText(event.getLength() - 1, 1).equals("\n")) {
           // if the message is not empty (not counting the newline)
           if (event.getLength() > 1) {
-            feature.sendTextOut(removeHtml(event.getText(0, event.getLength() - 1)));
+//            feature.sendTextOut(removeHtml(event.getText(0, event.getLength() - 1)));
+            feature.sendTextOut(event.getText(0, event.getLength() - 1));
           }
           SwingUtilities.invokeLater(()->chatField.setText(""));
         }
