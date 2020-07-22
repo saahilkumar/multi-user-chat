@@ -9,6 +9,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -40,6 +41,7 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
   private Feature feature;
   private StringBuilder log;
   private CountDownLatch latch;
+  private Map<String, String> emotes;
 
   public MultiChatViewImpl() {
     this.setLayout(new FlowLayout());
@@ -69,6 +71,15 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
     this.pack();
 
     this.setResizable(false);
+
+    emotes = new HashMap<>();
+    emotes.put("&lt;3", "heart_emoji.png");
+    emotes.put(":\\)", "smiley.png");
+    emotes.put(":\\(", "frowny.png");
+    emotes.put(":/", "confused.png");
+    emotes.put(":D", "excited.png");
+    emotes.put("D:", "anguish.png");
+    emotes.put(":p", "tongue.png");
   }
 
   @Override
@@ -134,7 +145,6 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
   }
 
   private String convertEmote(String msg) {
-    Map<String, String> emotes = feature.getModelEmotes();
     for(String emoteName : emotes.keySet()) {
       msg = msg.replaceAll(emoteName,
           "<img src = \"" + MultiChatServer.class.getClassLoader()

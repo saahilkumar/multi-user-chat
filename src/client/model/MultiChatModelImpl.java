@@ -13,23 +13,12 @@ public class MultiChatModelImpl implements MultiChatModel {
   private Socket socket;
   private Scanner in;
   private PrintWriter out;
-  private Map<String, String> emotes;
-
 
   public MultiChatModelImpl(String ipAddress, int portNum) throws IOException {
     this.ipAddress = ipAddress;
     socket = new Socket(this.ipAddress, portNum);
     in = new Scanner(socket.getInputStream());
     out = new PrintWriter(socket.getOutputStream(), true);
-
-    emotes = new HashMap<>();
-    emotes.put("&lt;3", "heart_emoji.png");
-    emotes.put(":\\)", "smiley.png");
-    emotes.put(":\\(", "frowny.png");
-    emotes.put(":/", "confused.png");
-    emotes.put(":D", "excited.png");
-    emotes.put("D:", "anguish.png");
-    emotes.put(":p", "tongue.png");
   }
 
   @Override
@@ -51,10 +40,5 @@ public class MultiChatModelImpl implements MultiChatModel {
   public MultiChatModelImpl switchPorts(String portNumber) throws IOException,
       NumberFormatException {
     return new MultiChatModelImpl(this.ipAddress, Integer.parseInt(portNumber));
-  }
-
-  @Override
-  public Map<String, String> getEmotes() {
-    return emotes;
   }
 }

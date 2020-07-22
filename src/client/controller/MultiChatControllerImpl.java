@@ -75,9 +75,4 @@ public class MultiChatControllerImpl implements MultiChatController, Feature {
   public void sendTextOut(String out) {
     model.sendText(out);
   }
-
-  @Override
-  public Map<String, String> getModelEmotes() {
-    return model.getEmotes();
-  }
 }
