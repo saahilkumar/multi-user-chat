@@ -174,7 +174,7 @@ public class MultiChatServer {
      */
     private void acceptAndProcessUsername() {
       out.println("NAMEACCEPTED " + name);
-      out.println("MESSAGEWELCOME Welcome to MultiChat Room " + portNum + " " + name + "! Use /help if you need any assistance!");
+      out.println("MESSAGEWELCOME Welcome to MultiChat Room " + portNum + ", " + name + "! Use /help if you need any assistance!");
       for (PrintWriter writer : outputWriters) {
         writer.println("MESSAGEUSERJOINED " + "[" + new Date().toString() + "] " +
             name + " has joined.");
@@ -197,8 +197,15 @@ public class MultiChatServer {
         else if (input.toLowerCase().startsWith("/help")) {
           printHelpMessage();
         } else if (input.toLowerCase().startsWith("/emotes")) {
-          //TODO: add emote handling
-        } else {
+          printEmoteHelpMessage();
+        }
+        else if(input.toLowerCase().startsWith("/join ")) {
+          out.println("REQUESTEDNEWROOM " + input.substring(6));
+        }
+        else if (input.startsWith("UNSUCCESSFULROOMCHANGE ")) {
+          out.println("MESSAGEHELP " + input.substring(23));
+        }
+        else {
           for (PrintWriter writer : outputWriters) {
             writer.println("MESSAGE " + "[" + new Date().toString() + "] " + name + ": " + input);
           }
@@ -233,6 +240,12 @@ public class MultiChatServer {
       out.println("MESSAGEHELP Type /quit to quit MultiChat.");
       out.println("MESSAGEHELP Type /emotes to access a menu of emoticons.");
       out.println("MESSAGEHELP Type /help to access this help menu.");
+      out.println("MESSAGEHELP Type /join to join another chat room, "
+          + "enter the room number such like: \"/join 59090\".");
+    }
+
+    private void printEmoteHelpMessage() {
+      out.println("MESSAGEHELP heart <p>&lt;3</p>");
     }
 
     private void updateActiveUsers() {
@@ -258,6 +271,15 @@ public class MultiChatServer {
       out.println(serverList.toString());
     }
   }
+
+//  private static String convertEmote(String msg) {
+//    String convertedMessage = msg.replaceAll("&lt;3",
+//        "<img src = \"" + MultiChatServer.class.getClassLoader()
+//            .getResource("resources/images/heart_emoji.png").toString() + "\"" +
+//            " alt = \"&lt;3\" width = \"15\" height = \"15\">");
+//
+//    return convertedMessage;
+//  }
 }
 
 

@@ -3,9 +3,11 @@ package client.controller;
 import client.model.MultiChatModel;
 import client.view.MultiChatView;
 import java.awt.Color;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class MultiChatControllerImpl implements MultiChatController, Feature {
 
@@ -52,6 +54,17 @@ public class MultiChatControllerImpl implements MultiChatController, Feature {
         String[] arr = line.substring(17).split(",");
         List<String> servers = new ArrayList<>(Arrays.asList(arr));
         view.setActiveServers(servers);
+      } else if (line.startsWith("REQUESTEDNEWROOM ")) {
+        try {
+          MultiChatModel newModel = model.switchPorts(line.substring(17));
+          model.sendText("/quit");
+          view.appendChatLog("Successfully left.\n", "red", false);
+          model = newModel;
+        } catch (IOException e) {
+          model.sendText("UNSUCCESSFULROOMCHANGE Cannot connect to new chat room.");
+        } catch (NumberFormatException nfe) {
+          model.sendText("UNSUCCESSFULROOMCHANGE Cannot find specified room number.");
+        }
       }
     }
 
@@ -61,5 +74,10 @@ public class MultiChatControllerImpl implements MultiChatController, Feature {
   @Override
   public void sendTextOut(String out) {
     model.sendText(out);
+  }
+
+  @Override
+  public Map<String, String> getModelEmotes() {
+    return model.getEmotes();
   }
 }

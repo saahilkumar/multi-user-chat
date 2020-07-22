@@ -1,7 +1,6 @@
 package client.view;
 
 import client.controller.Feature;
-import java.awt.Color;
 import java.util.List;
 
 public interface MultiChatView {

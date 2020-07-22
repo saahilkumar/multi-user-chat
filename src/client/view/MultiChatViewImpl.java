@@ -10,6 +10,7 @@ import java.awt.event.FocusListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -29,6 +30,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import java.awt.event.FocusListener;
+import server.MultiChatServer;
 
 public class MultiChatViewImpl extends JFrame implements MultiChatView {
   private JTextPane chatLog;
@@ -72,6 +74,7 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
   @Override
   public String getName(String prompt) {
     ScreenNameSelection namePane = new ScreenNameSelection(prompt);
+    this.setVisible(false);
 
     latch = new CountDownLatch(1);
     try {
@@ -93,7 +96,7 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
   @Override
   public void setTextFieldEditable(boolean b) {
     chatField.setEditable(b);
-    chatField.getDocument().addDocumentListener(new TextAreaListener());
+//    chatField.getDocument().addDocumentListener(new TextAreaListener());
   }
 
   @Override
@@ -124,9 +127,26 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
       s = formatDate(s);
     }
     String toAdd = "<span style=\"color:"+ color +"\">" + s + "</span><br>";
-    log.append(toAdd);
+//    toAdd = convertEmote(toAdd);
+    log.append(convertEmote(toAdd));
     chatLog.setText(log.toString());
     chatLog.setCaretPosition(chatLog.getDocument().getLength());
+  }
+
+  private String convertEmote(String msg) {
+    Map<String, String> emotes = feature.getModelEmotes();
+    for(String emoteName : emotes.keySet()) {
+      msg = msg.replaceAll(emoteName,
+          "<img src = \"" + MultiChatServer.class.getClassLoader()
+              .getResource("resources/images/" + emotes.get(emoteName)).toString() + "\"" +
+              " alt = \"error\" width = \"20\" height = \"20\">");
+    }
+//    String convertedMessage = msg.replaceAll("&lt;3",
+//        "<img src = \"" + MultiChatServer.class.getClassLoader()
+//            .getResource("resources/images/heart_emoji.png").toString() + "\"" +
+//            " alt = \"&lt;3\" width = \"20\" height = \"20\">");
+
+    return msg;
   }
 
   private String formatDate(String msg) {
@@ -199,6 +219,7 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
       chatField.setLineWrap(true);
       chatField.setAutoscrolls(true);
       chatField.addFocusListener(new JTextAreaListener());
+      chatField.getDocument().addDocumentListener(new TextAreaListener());
       this.add(new JScrollPane(chatField));
     }
   }

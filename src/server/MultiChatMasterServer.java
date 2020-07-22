@@ -53,6 +53,7 @@ public class MultiChatMasterServer {
           outputWriters.remove(out);
           activeServers.remove(serverPortName);
           updateServerList();
+          multiChatServerClientSocket.close();
           return;
         }
       }
