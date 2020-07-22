@@ -19,6 +19,11 @@ public interface MultiChatView {
       entry(":p", "tongue.png")
   );
 
+  Map<String, String> TWITCH_EMOTES = Map.ofEntries(
+      entry("Pepehands", "Pepehands.png"),
+      entry("Pepega", "Pepega.png")
+  );
+
   String getName(String prompt);
 
   void giveFeatures(Feature feature);
