@@ -17,11 +17,12 @@ public interface MultiChatView {
       entry(":D", "excited.png"),
       entry("D:", "anguish.png"),
       entry(":p", "tongue.png"),
-      entry("&gt;:(", "angry.png")
+      entry("&gt;:(", "angry.png"),
+      entry(":O", "wow.png")
   );
 
   Map<String, String> TWITCH_EMOTES = Map.ofEntries(
-      entry("Pepehands", "Pepehands.png"),
+      entry("PepeHands", "PepeHands.png"),
       entry("Pepega", "Pepega.png"),
       entry("Kappa", "Kappa.png"),
       entry("forsenCD", "forsenCD.jpg"),
@@ -34,7 +35,11 @@ public interface MultiChatView {
       entry("Pog", "Pog.png"),
       entry("OMEGALUL", "OMEGALUL.png"),
       entry("KEKW", "KEKW.png"),
-      entry("monkaHmm", "monkaHmm.png")
+      entry("monkaHmm", "monkaHmm.png"),
+      entry("monkaGun", "monkaGun.png"),
+      entry("5Head", "5Head.png"),
+      entry("PepeLaugh", "PepeLaugh.png"),
+      entry("POGGERS", "POGGERS.png")
   );
 
   String getName(String prompt);
