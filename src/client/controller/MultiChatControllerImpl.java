@@ -2,12 +2,10 @@ package client.controller;
 
 import client.model.MultiChatModel;
 import client.view.MultiChatView;
-import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class MultiChatControllerImpl implements MultiChatController, Feature {
 

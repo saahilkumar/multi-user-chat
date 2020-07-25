@@ -135,7 +135,6 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
       toAdd = "<pre><span style=\"font-size: 9px;color:"+ color +"\">" + convertEmote(removeHtml(formatDate(s))) + " </span></pre>";
       String user = extractName(toAdd);
       dateLength = extractDateLength(toAdd);
-      System.out.println(dateLength);
       if(user.equals(prevName)) {
         // getting the message that comes after the name
         s = s.substring(s.indexOf(user) + user.length() + 1);
