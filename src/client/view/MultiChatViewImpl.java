@@ -4,14 +4,11 @@ import client.controller.Feature;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -26,14 +23,11 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import java.awt.event.FocusListener;
-import server.MultiChatServer;
 
 public class MultiChatViewImpl extends JFrame implements MultiChatView {
   private JTextPane chatLog;
@@ -44,8 +38,10 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
   private StringBuilder log;
   private CountDownLatch latch;
 
-  public MultiChatViewImpl() {
+  private String prevName;
+  private int dateLength;
 
+  public MultiChatViewImpl() {
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch (Exception ex) {
@@ -75,19 +71,14 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
     this.add(new JScrollPane(activeServers));
 
 
+    this.prevName = "";
+    this.dateLength = 0;
 
     this.pack();
 
-    this.setResizable(false);
+    this.setLocationRelativeTo(null);
 
-//    emotes = new HashMap<>();
-//    emotes.put("&lt;3", "heart_emoji.png");
-//    emotes.put(":\\)", "smiley.png");
-//    emotes.put(":\\(", "frowny.png");
-//    emotes.put(":/", "confused.png");
-//    emotes.put(":D", "excited.png");
-//    emotes.put("D:", "anguish.png");
-//    emotes.put(":p", "tongue.png");
+    this.setResizable(false);
   }
 
   @Override
@@ -103,7 +94,6 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
     }
 
     this.setTitle("MultiChat - " + namePane.getInput());
-//    return removeHtml(namePane.getInput());
     return namePane.getInput();
   }
 
@@ -116,7 +106,6 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
   @Override
   public void setTextFieldEditable(boolean b) {
     chatField.setEditable(b);
-//    chatField.getDocument().addDocumentListener(new TextAreaListener());
   }
 
   @Override
@@ -141,23 +130,42 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
 
   @Override
   public void appendChatLog(String s, String color, boolean hasDate) {
-//    if(hasDate) {
-//      s = formatDate(s);
-//    }
-//    s = convertEmote(s);
-//    String toAdd = "<span style=\"color:"+ color +"\">" + s + " </span><br>";
-//    log.append(toAdd);
-//    chatLog.setText(log.toString());
-//    chatLog.setCaretPosition(chatLog.getDocument().getLength());
     String toAdd = "";
     if(hasDate) {
-      toAdd = "<span style=\"color:"+ color +"\">" + convertEmote(removeHtml(formatDate(s))) + " </span><br>";
+      toAdd = "<pre><span style=\"font-size: 9px;color:"+ color +"\">" + convertEmote(removeHtml(formatDate(s))) + " </span></pre>";
+      String user = extractName(toAdd);
+      dateLength = extractDateLength(toAdd);
+      System.out.println(dateLength);
+      if(user.equals(prevName)) {
+        // getting the message that comes after the name
+        s = s.substring(s.indexOf(user) + user.length() + 1);
+
+        // recursive call of appendChatLog but this time with padded spaces instead of date/name
+        appendChatLog(String.format("%-" + (dateLength + prevName.length() + 2) + "s", "") + s, color, false);
+        return;
+      }
+      prevName = user;
     } else {
-      toAdd = "<span style=\"color:"+ color +"\">" + convertEmote(removeHtml(s)) + " </span><br>";
+      toAdd = "<pre><span style=\"font-size: 9px;color:"+ color +"\">" + convertEmote(removeHtml(s)) + " </span></pre>";
+      // if the message is not padded, reset prevName
+      if(!s.startsWith("     ")) {
+        prevName = "";
+      }
     }
     log.append(toAdd);
     chatLog.setText(log.toString());
     chatLog.setCaretPosition(chatLog.getDocument().getLength());
+  }
+
+  private String extractName(String msg) {
+    return msg.substring(msg.indexOf("]") + 2).split(": ")[0];
+  }
+
+  private int extractDateLength(String msg) {
+    if(msg.contains("]") && msg.contains("[")) {
+      return msg.substring(msg.indexOf("["), msg.indexOf("]") + 1).length();
+    }
+    return 0;
   }
 
   private String convertEmote(String msg) {
@@ -169,11 +177,11 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
     for(String word : words) {
       // if the word equals an emoji name (ex. <3) then replace it with html image code
       if(MultiChatView.EMOTES.containsKey(word.trim())) {
-        builder.append("<img src = \"" + MultiChatServer.class.getClassLoader()
+        builder.append("<img src = \"" + MultiChatViewImpl.class.getClassLoader()
               .getResource("resources/images/emojis/" + MultiChatView.EMOTES.get(word.trim())).toString() + "\"" +
               " alt = \"error\" width = \"20\" height = \"20\">");
       } else if(MultiChatView.TWITCH_EMOTES.containsKey(word.trim())) {
-        builder.append("<img src = \"" + MultiChatServer.class.getClassLoader()
+        builder.append("<img src = \"" + MultiChatViewImpl.class.getClassLoader()
             .getResource("resources/images/twitch/" + MultiChatView.TWITCH_EMOTES.get(word.trim())).toString() + "\"" +
             " alt = \"error\" width = \"40\" height = \"40\">");
       } else {
@@ -214,7 +222,7 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
     StringBuilder builder = new StringBuilder();
     builder.append("<h3>Active Users:</h3>");
     for(String name : names) {
-      builder.append(removeHtml(name) + "<br>");
+      builder.append("<pre>" + removeHtml(name) + "</pre>");
     }
     activeUsers.setText(builder.toString());
   }
@@ -224,7 +232,7 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
     StringBuilder builder = new StringBuilder();
     builder.append("<h3>Active Servers:</h3>");
     for(String server : servers) {
-      builder.append(server + "<br>");
+      builder.append("<pre>" + server + "</pre>");
     }
     activeServers.setText(builder.toString());
   }
@@ -244,11 +252,9 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
       chatLog = new JTextPane();
       chatLog.setContentType("text/html");
       chatLog.setEditable(false);
-      chatLog.setPreferredSize(new Dimension(400, 300));
-//      chatLog.setAutoscrolls(true);
-//      chatLog.setBorder(new LineBorder(Color.MAGENTA, 1));
 
       JScrollPane scrollChatLog = new JScrollPane(chatLog);
+      scrollChatLog.setPreferredSize(new Dimension(400, 300));
       scrollChatLog.setBorder(new LineBorder(Color.BLUE, 1));
       this.add(scrollChatLog);
 
@@ -332,6 +338,7 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
 
       this.add(buttonPanel);
       this.pack();
+      this.setLocationRelativeTo(null);
       this.setVisible(true);
       this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 

@@ -1,9 +1,12 @@
 package client.view;
 
 import client.controller.Feature;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+// CHANGE LOG
+// ADDED <pre> to appendChatLog and setActiveUsers/Servers
+// Removes <br> from everywhere in ViewImpl and \n from everywhere in controllerImpl
 
 import static java.util.Map.entry;
 
@@ -18,7 +21,9 @@ public interface MultiChatView {
       entry("D:", "anguish.png"),
       entry(":p", "tongue.png"),
       entry("&gt;:(", "angry.png"),
-      entry(":O", "wow.png")
+      entry(":O", "wow.png"),
+      entry(":|", "neutral.png"),
+      entry(";)", "wink.png")
   );
 
   Map<String, String> TWITCH_EMOTES = Map.ofEntries(
@@ -39,7 +44,8 @@ public interface MultiChatView {
       entry("monkaGun", "monkaGun.png"),
       entry("5Head", "5Head.png"),
       entry("PepeLaugh", "PepeLaugh.png"),
-      entry("POGGERS", "POGGERS.png")
+      entry("POGGERS", "POGGERS.png"),
+      entry("ratirlCoffee", "ratirlCoffee.png")
   );
 
   String getName(String prompt);
