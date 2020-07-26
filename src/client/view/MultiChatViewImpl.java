@@ -4,17 +4,24 @@ import client.controller.Feature;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Image;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -37,6 +44,7 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
   private Feature feature;
   private StringBuilder log;
   private CountDownLatch latch;
+  private JMenuBar menu;
 
   private String prevName;
   private int dateLength;
@@ -47,6 +55,9 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
     } catch (Exception ex) {
       ex.printStackTrace();
     }
+
+    menu = new CustomMenuBar();
+    this.setJMenuBar(menu);
 
     this.setLayout(new FlowLayout());
     CenterPanel center = new CenterPanel();
@@ -177,11 +188,11 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
       // if the word equals an emoji name (ex. <3) then replace it with html image code
       if(MultiChatView.EMOTES.containsKey(word.trim())) {
         builder.append("<img src = \"" + MultiChatViewImpl.class.getClassLoader()
-              .getResource("resources/images/emojis/" + MultiChatView.EMOTES.get(word.trim())).toString() + "\"" +
+              .getResource("client/resources/images/emojis/" + MultiChatView.EMOTES.get(word.trim())).toString() + "\"" +
               " alt = \"error\" width = \"20\" height = \"20\">");
       } else if(MultiChatView.TWITCH_EMOTES.containsKey(word.trim())) {
         builder.append("<img src = \"" + MultiChatViewImpl.class.getClassLoader()
-            .getResource("resources/images/twitch/" + MultiChatView.TWITCH_EMOTES.get(word.trim())).toString() + "\"" +
+            .getResource("client/resources/images/twitch/" + MultiChatView.TWITCH_EMOTES.get(word.trim())).toString() + "\"" +
             " alt = \"error\" width = \"40\" height = \"40\">");
       } else {
         builder.append(word);
@@ -381,5 +392,64 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
     public void focusLost(FocusEvent e) {
       return;
     }
+  }
+
+  private class CustomMenuBar extends JMenuBar {
+    private JMenu settings;
+    private JMenu view;
+    private JMenu help;
+
+    private JMenu switchRooms;
+    private JMenu privateMessage;
+
+    private JMenuItem darkmode;
+    private JMenuItem font;
+    private JMenuItem helpItem;
+
+    private CustomMenuBar() {
+      settings = new JMenu("MultiChat");
+      this.add(settings);
+      view = new JMenu("View");
+      this.add(view);
+      help = new JMenu("Help");
+      this.add(help);
+
+      switchRooms = new JMenu("Switch Rooms");
+      privateMessage = new JMenu("Private Message...");
+      darkmode = new JMenuItem("Enable Darkmode");
+      font = new JMenuItem("Font");
+      helpItem = new JMenuItem("Help");
+
+      try {
+        Image switchRoomIcon = ImageIO.read(getClass().getResource(
+            "/client/resources/images/jmenuicons/switchrooms.png"));
+        switchRooms.setIcon(new ImageIcon(switchRoomIcon));
+        Image privateMsgIcon = ImageIO.read(getClass().getResource(
+            "/client/resources/images/jmenuicons/priv message.png"));
+        privateMessage.setIcon(new ImageIcon(privateMsgIcon));
+        Image fontIcon = ImageIO.read(getClass().getResource(
+            "/client/resources/images/jmenuicons/font.png"));
+        font.setIcon(new ImageIcon(fontIcon));
+        Image darkModeIcon = ImageIO.read(getClass().getResource(
+            "/client/resources/images/jmenuicons/darkmode.png"));
+        darkmode.setIcon(new ImageIcon(darkModeIcon));
+        Image questionIcon = ImageIO.read(getClass().getResource(
+            "/client/resources/images/jmenuicons/question.png"));
+        helpItem.setIcon(new ImageIcon(questionIcon));
+      } catch (IOException ioe) {
+        System.out.print("Failed to open load icon images.");
+      }
+
+      settings.add(switchRooms);
+      settings.add(privateMessage);
+      view.add(darkmode);
+      view.add(font);
+      help.add(helpItem);
+
+      helpItem.addActionListener(e -> createHelpDialog());
+    }
+  }
+  private void createHelpDialog() {
+    new HelpDialog();
   }
 }
