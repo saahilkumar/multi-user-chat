@@ -2,27 +2,37 @@ package server;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
 
 /**
  * Represents a simple-text server handling the input and output to several clients (30).
  */
 public class MultiChatServer {
 
-  // holds the ports of all the active servers
-  private static HashSet<String> serverNames = new HashSet<>();
   //holds the names of active clients
   private static HashSet<String> names = new HashSet<>();
 
   //a set of writers that write to the output of a client's socket
   private static HashSet<PrintWriter> outputWriters = new HashSet<>();
+
+  private static HashSet<String> serverNames = new HashSet();
 
   /**
    * Main method to start the MultiChat server and listens for 1<=x<=args connections on local port
@@ -35,26 +45,16 @@ public class MultiChatServer {
    * @throws IllegalArgumentException when supplied more than one argument
    * @throws NumberFormatException when given a non-integer argument.
    */
-  public static void main(String[] args) throws IOException, IllegalArgumentException,
+  public static void main(String[] args) throws IllegalArgumentException,
       NumberFormatException {
     int possibleAmountOfClients;
-    int portNum;
-//    if (args.length == 1) {
-//      possibleAmountOfClients = Integer.parseInt(args[1]);
-//    } else if (args.length == 0) {
-//      possibleAmountOfClients = 30;
-//    } else {
-//      throw new IllegalArgumentException("Supplied more than 1 argument. Please enter zero or one "
-//          + "integer only for number of desired clients.");
-//    }
-    if (args.length == 1) {
-      possibleAmountOfClients = 30;
-      portNum = Integer.parseInt(args[0]);
-    } else if (args.length == 2) {
-      portNum = Integer.parseInt(args[0]);
+    if (args.length == 2) {
       possibleAmountOfClients = Integer.parseInt(args[1]);
+    } else if (args.length == 1) {
+      possibleAmountOfClients = 30;
     } else {
-      throw new IllegalArgumentException("Supply the right amount of arguments dumbass");
+      throw new IllegalArgumentException("Supplied more than 2 argument. Please enter zero or one "
+          + "integer only for number of desired clients.");
     }
     System.out.println("MultiChat Server is running...");
 
@@ -62,16 +62,42 @@ public class MultiChatServer {
     masterServerCommunication.start();
 
     ExecutorService pool = Executors.newFixedThreadPool(possibleAmountOfClients);
-    try (ServerSocket server = new ServerSocket(portNum)) {
+    try {
+      SSLServerSocket server = initSSLDetailsAndGetSocket(args[0]);
       while (true) {
-        pool.execute(new Task(server.accept(), args[0]));
+        pool.execute(new Task((SSLSocket)server.accept(), args[0]));
       }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
-  /**
-   * Communication with Master Server.
-   */
+  private static SSLServerSocket initSSLDetailsAndGetSocket(String portNumber)
+      throws NoSuchAlgorithmException, KeyStoreException, IOException, CertificateException,
+      UnrecoverableKeyException, KeyManagementException {
+
+    SSLServerSocketFactory ssf;
+
+    // set up key manager to do server authentication
+    SSLContext ctx;
+    KeyManagerFactory kmf;
+    KeyStore ks;
+    char[] passphrase = "socketpractice".toCharArray();
+
+    ctx = SSLContext.getInstance("TLS");
+    kmf = KeyManagerFactory.getInstance("SunX509");
+    ks = KeyStore.getInstance("JKS");
+
+    ks.load(MultiChatServer.class.getClassLoader().getResourceAsStream(
+        "server/resources/keystore/server_keystore.jks"), passphrase);
+    kmf.init(ks, passphrase);
+
+    ctx.init(kmf.getKeyManagers(), null, null);
+
+    ssf = ctx.getServerSocketFactory();
+    return (SSLServerSocket) ssf.createServerSocket(Integer.parseInt(portNumber));
+  }
+
   private static class RunServerCommunication implements Runnable {
 
     private String portNumber;
@@ -90,12 +116,12 @@ public class MultiChatServer {
         while(serverIn.hasNextLine()) {
           String serverList = serverIn.nextLine();
           serverList = serverList.substring(17);
-          System.out.println(serverList);
           String[] activeServers = serverList.split(", ");
           serverNames.clear();
           for (String server : activeServers) {
             serverNames.add(server);
           }
+          System.out.println(serverList);
           updateServerList();
         }
       } catch (IOException e) {
@@ -112,15 +138,15 @@ public class MultiChatServer {
   private static class Task implements Runnable {
 
     private String name; //name of client
-    private final Socket clientSocket; //the socket of the client connection
+    private final SSLSocket clientSocket; //the socket of the client connection
     private Scanner in; //the input of the client
     private PrintWriter out; //the output to the client
-    private String portNum;
+    private String portNumber;
 
     //Captures the client's socket as a field.
-    private Task(Socket clientSocket, String portNum) {
+    private Task(SSLSocket clientSocket, String portNumber) {
       this.clientSocket = clientSocket;
-      this.portNum = portNum;
+      this.portNumber = portNumber;
     }
 
     @Override
@@ -154,7 +180,6 @@ public class MultiChatServer {
         out.println(submitNameProtocol);
         name = in.nextLine();
         if (name == null) {
-          System.out.println("name was null");
           userLeave();
           throw new IllegalArgumentException("Supplied a null name.");
         }
@@ -174,16 +199,16 @@ public class MultiChatServer {
      */
     private void acceptAndProcessUsername() {
       out.println("NAMEACCEPTED " + name);
-      out.println("MESSAGEWELCOME Welcome to MultiChat Room " + portNum + ", " + name + "! Use /help if you need any assistance!");
+      out.println("MESSAGEWELCOME Welcome to Multi-Chat, room "+ portNumber + ", "
+          + name + ". Use /help for help!");
       for (PrintWriter writer : outputWriters) {
         writer.println("MESSAGEUSERJOINED " + "[" + new Date().toString() + "] " +
             name + " has joined.");
       }
       outputWriters.add(out);
-      System.out.println("[" + new Date().toString() + "] " + name + " has joined.");
-
       updateActiveUsers();
       updateServerList();
+      System.out.println("[" + new Date().toString() + "] " + name + " has joined.");
     }
 
     //transmits user messages to other clients, handles user command requests as a well
@@ -193,21 +218,17 @@ public class MultiChatServer {
         if (input.toLowerCase().startsWith("/quit")) {
           userLeave();
           return;
-        }
-        else if (input.toLowerCase().startsWith("/help")) {
+        } else if (input.toLowerCase().startsWith("/help")) {
           printHelpMessage();
         } else if (input.toLowerCase().startsWith("/emotes")) {
           printEmoteHelpMessage();
-        }
-        else if(input.toLowerCase().startsWith("/join ")) {
+        } else if (input.toLowerCase().startsWith("/join ")) {
           out.println("REQUESTEDNEWROOM " + input.substring(6));
-        }
-        else if (input.startsWith("UNSUCCESSFULROOMCHANGE ")) {
+        } else if (input.startsWith("UNSUCCESSFULROOMCHANGE ")) {
           out.println("MESSAGEHELP " + input.substring(23));
-        }
-        else {
+        } else {
           for (PrintWriter writer : outputWriters) {
-            writer.println("MESSAGE " + "[" + new Date().toString() + "] " + name + ": " + input);
+            writer.println("MESSAGE " + "[" + new Date().toString() + "] " + name + ": " +input);
           }
         }
       }
@@ -239,47 +260,44 @@ public class MultiChatServer {
     private void printHelpMessage() {
       out.println("MESSAGEHELP Type /quit to quit MultiChat.");
       out.println("MESSAGEHELP Type /emotes to access a menu of emoticons.");
-      out.println("MESSAGEHELP Type /help to access this help menu.");
       out.println("MESSAGEHELP Type /join to join another chat room, "
           + "enter the room number such like: \"/join 59090\".");
+      out.println("MESSAGEHELP Type /help to access this help menu.");
     }
 
     private void printEmoteHelpMessage() {
-      out.println("MESSAGEHELP heart <p>&lt;3</p>");
+      out.println("MESSAGEHELP Emotes menu: ");
+      out.println("MESSAGEHELP Smiley Face :) : \":)\"");
+      out.println("MESSAGEHELP Frowny Face :( : \":(\"");
+      out.println("MESSAGEHELP Ambivalent Face :/ : \":/\"");
+      out.println("MESSAGEHELP Excited :D : \":D\"");
+      out.println("MESSAGEHELP Despair D: : \"D:\"");
+      out.println("MESSAGEHELP Quirky :p :  \":p\"");
+      out.println("MESSAGEHELP Pepega( Pepega ) : \"Pepega\"");
+      out.println("MESSAGEHELP Pepehands( Pepehands ): \"Pepehands\"");
     }
 
     private void updateActiveUsers() {
-      for(PrintWriter writer : outputWriters) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("ACTIVEUSERLIST ");
-        for(String user : names) {
-          builder.append(user + ",");
+      for (PrintWriter writer : outputWriters) {
+        StringBuilder activeUserList = new StringBuilder();
+        activeUserList.append("ACTIVEUSERLIST ");
+        for (String name : names) {
+          activeUserList.append(name + ",");
         }
-        writer.println(builder.toString());
+        writer.println(activeUserList.toString());
       }
     }
   }
 
   private static void updateServerList() {
-    for(PrintWriter out : outputWriters) {
+    for (PrintWriter out : outputWriters) {
       StringBuilder serverList = new StringBuilder();
       serverList.append("ACTIVESERVERLIST ");
-      for(String serverName : serverNames) {
+      for (String serverName : serverNames) {
         serverList.append(serverName + ",");
       }
-
       out.println(serverList.toString());
+      System.out.println(serverList.toString());
     }
   }
-
-//  private static String convertEmote(String msg) {
-//    String convertedMessage = msg.replaceAll("&lt;3",
-//        "<img src = \"" + MultiChatServer.class.getClassLoader()
-//            .getResource("resources/images/heart_emoji.png").toString() + "\"" +
-//            " alt = \"&lt;3\" width = \"15\" height = \"15\">");
-//
-//    return convertedMessage;
-//  }
 }
-
-

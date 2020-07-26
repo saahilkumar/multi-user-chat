@@ -49,11 +49,13 @@ public class MultiChatMasterServer {
 
     private void checkServerRunning() throws IOException {
       while(true) {
-        if (multiChatServerClientSocket.getInputStream().read() == -1) {
+        try {
+          multiChatServerClientSocket.getInputStream().read();
+        } catch (IOException ioe) {
           outputWriters.remove(out);
           activeServers.remove(serverPortName);
-          updateServerList();
           multiChatServerClientSocket.close();
+          updateServerList();
           return;
         }
       }
@@ -83,7 +85,7 @@ public class MultiChatMasterServer {
           serverListBuilder.append(server + ", ");
         }
         output.println(serverListBuilder.toString());
-        System.out.print(serverListBuilder.toString());
+        System.out.println(serverListBuilder.toString());
       }
     }
   }
