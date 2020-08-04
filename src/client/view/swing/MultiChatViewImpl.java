@@ -1,6 +1,7 @@
-package client.view;
+package client.view.swing;
 
 import client.controller.Feature;
+import client.view.MultiChatView;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;

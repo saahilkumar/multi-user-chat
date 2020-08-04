@@ -1,4 +1,4 @@
-package client.view;
+package client.view.swing;
 
 import java.awt.Dimension;
 import javax.swing.JDialog;

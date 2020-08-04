@@ -58,8 +58,6 @@ public interface MultiChatView {
 
   void appendChatLog(String s, String color, boolean hasDate);
 
-  void setTitle(String s);
-
   void setActiveUsers(List<String> names);
 
   void dispose();
