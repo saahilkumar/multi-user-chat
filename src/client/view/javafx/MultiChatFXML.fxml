@@ -6,6 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.scene.text.TextFlow?>
 <VBox xmlns="http://javafx.com/javafx"
   xmlns:fx="http://javafx.com/fxml"
   fx:controller="client.view.javafx.FXMLController"
@@ -31,8 +32,8 @@
     <TextArea editable="false" text = "Active Users:"></TextArea>
     <VBox minWidth = "600" alignment="CENTER">
       <Label textFill="white" style="-fx-background-color: #55AAFF; -fx-font-size: 40" minWidth="600" alignment="CENTER">MultiChat</Label>
-      <TextArea fx:id="chatLog" editable="false" minHeight = "450" wrapText="true"></TextArea>
-      <TextArea promptText="Type here..." fx:id="chatField" maxHeight="70" wrapText="true"></TextArea>
+      <TextFlow fx:id="chatLog" minHeight = "450"></TextFlow>
+      <TextArea promptText="Type here..." fx:id="chatField" maxHeight="70" wrapText="true" onKeyPressed="#onEnter"></TextArea>
     </VBox>
     <TextArea editable="false" text = "Active Servers:"></TextArea>
   </HBox>
