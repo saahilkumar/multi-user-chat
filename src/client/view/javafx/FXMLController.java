@@ -9,6 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -25,23 +26,49 @@ public class FXMLController {
   private Feature features;
   private Scene root;
   private String name;
+  private Scene scene;
 
   @FXML
   private TextArea chatField;
   @FXML
   private TextFlow chatLog;
+//  @FXML
+//  private CheckMenuItem darkModeMenuItem;
 
   public void setFeatures(Feature features) {
     this.features = features;
     System.out.print("features:  " + this.features);
   }
 
+  public void setScene(Scene scene) {
+    this.scene = scene;
+  }
+
+//  public void setDarkMode() {
+//    if(darkModeMenuItem.isSelected()) {
+//      darkModeMenuItem.setText("Disable Dark Mode");
+//      scene.getStylesheets().add(getClass().getResource("Darkmode.css").toExternalForm());
+//    } else {
+//      darkModeMenuItem.setText("Enable Dark Mode");
+//      scene.getStylesheets().remove(getClass().getResource("Darkmode.css").toExternalForm());
+//    }
+//  }
+
   public void onEnter(KeyEvent ke) {
     if(ke.getCode() == KeyCode.ENTER) {
-      ke.consume();
-      String text = chatField.getText().substring(0, chatField.getText().length() - 1);
-      features.sendTextOut(text);
-      chatField.setText("");
+      if(chatField.getText().isBlank()){
+        chatField.setText("");
+      }
+      else {
+        ke.consume();
+        String text = chatField.getText();
+        // removing the newline char that was added by pressing the enter key
+        if (text.charAt(text.length() - 1) == '\n') {
+          text = text.substring(0, chatField.getText().length() - 1);
+        }
+        features.sendTextOut(text);
+        chatField.setText("");
+      }
     }
   }
 
@@ -50,7 +77,11 @@ public class FXMLController {
   }
 
   public void appendChatLog(String s, String color, boolean hasDate) {
-    appendMessage(s, getColor(color));
+    if(hasDate) {
+      appendMessage(formatDate(s), getColor(color));
+    } else {
+      appendMessage(s, getColor(color));
+    }
   }
 
   private Color getColor(String color) {
@@ -100,6 +131,30 @@ public class FXMLController {
     imageView.setFitHeight(size);
     imageView.setFitWidth(size);
     return imageView;
+  }
+
+  private String formatDate(String message) {
+    String date = message.substring(0, message.indexOf("]"));
+    String[] dateComponents = date.split(" ");
+    String month = dateComponents[1];
+    String day = dateComponents[2];
+    String time = dateComponents[3];
+    time = time.substring(0, time.lastIndexOf(":"));
+    String timezone = dateComponents[4];
+
+    StringBuilder buildDate = new StringBuilder();
+    buildDate.append("[");
+    buildDate.append(month);
+    buildDate.append(" ");
+    buildDate.append(day);
+    buildDate.append(" ");
+    buildDate.append(time);
+    buildDate.append(" ");
+    buildDate.append(timezone);
+    buildDate.append("]");
+    buildDate.append(message.substring(message.indexOf("]") + 1));
+
+    return buildDate.toString();
   }
 
 }

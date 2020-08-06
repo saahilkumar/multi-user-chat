@@ -28,6 +28,7 @@ public class FXEntryPoint extends Application implements MultiChatView {
   public static CountDownLatch nameLatch = new CountDownLatch(1);
   private String name;
   private String prompt;
+  private Feature feature;
 
   public FXEntryPoint() {
     currentApp = this;
@@ -46,6 +47,7 @@ public class FXEntryPoint extends Application implements MultiChatView {
   @Override
   public void giveFeatures(Feature feature) {
     controller.setFeatures(feature);
+    this.feature = feature;
   }
 
   @Override
@@ -103,8 +105,10 @@ public class FXEntryPoint extends Application implements MultiChatView {
     // Get the Controller from the FXMLLoader
     controller = loader.getController();
     Scene scene = new Scene(flowPane, 800, 600);
+    controller.setScene(scene);
     window.setScene(scene);
     window.setTitle("MultiChat");
+    window.setOnCloseRequest(e -> feature.sendTextOut("/quit"));
     window.getIcons().add(new Image(this.getClass().getResourceAsStream("/client/resources/logo/multichat_logo.png")));
     initLatch.countDown();
   }
