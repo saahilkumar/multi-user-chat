@@ -63,7 +63,7 @@ public class FXEntryPoint extends Application implements MultiChatView {
 
   @Override
   public void setTextFieldEditable(boolean b) {
-
+    controller.setTextFieldEditable(b);
   }
 
   @Override
@@ -92,7 +92,7 @@ public class FXEntryPoint extends Application implements MultiChatView {
 
   @Override
   public void dispose() {
-    window.close();
+    Platform.runLater(() -> window.close());
   }
 
   @Override
@@ -102,7 +102,7 @@ public class FXEntryPoint extends Application implements MultiChatView {
     VBox flowPane = loader.load();
     // Get the Controller from the FXMLLoader
     controller = loader.getController();
-    Scene scene = new Scene(flowPane, 800, 800);
+    Scene scene = new Scene(flowPane, 800, 600);
     window.setScene(scene);
     window.setTitle("MultiChat");
     window.getIcons().add(new Image(this.getClass().getResourceAsStream("/client/resources/logo/multichat_logo.png")));

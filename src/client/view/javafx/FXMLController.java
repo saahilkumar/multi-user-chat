@@ -1,12 +1,17 @@
 package client.view.javafx;
 
 import client.controller.Feature;
+import client.view.MultiChatView;
+import client.view.swing.MultiChatViewImpl;
 import java.awt.TextField;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
@@ -40,11 +45,12 @@ public class FXMLController {
     }
   }
 
+  public void setTextFieldEditable(boolean b) {
+    chatField.setEditable(b);
+  }
+
   public void appendChatLog(String s, String color, boolean hasDate) {
-//    chatLog.appendText(s + "\n");
-    Text msg = new Text(s + "\n");
-    msg.setFill(getColor(color));
-    Platform.runLater(() -> chatLog.getChildren().add(msg));
+    appendMessage(s, getColor(color));
   }
 
   private Color getColor(String color) {
@@ -61,4 +67,39 @@ public class FXMLController {
         return Color.BLACK;
     }
   }
+
+  private void appendMessage(String msg, Color c) {
+
+    // split message by space
+    String[] words = msg.split(" ");
+
+    for (String word : words) {
+      // if the word equals an emoji name (ex. <3) then replace it with an ImageView of the emoji
+      // if the word equals a twitch emoji (ex. PepeHands) then replace it with an ImageView of the twitch emoji
+      // otherwise just add the word as plaintext
+      if (MultiChatView.EMOTES.containsKey(word.trim())) {
+        ImageView emoji = getEmote("/client/resources/images/emojis/" + MultiChatView.EMOTES.get(word.trim()), 20);
+        Platform.runLater(() -> chatLog.getChildren().add(emoji));
+      } else if (MultiChatView.TWITCH_EMOTES.containsKey(word.trim())) {
+        ImageView twitchEmote = getEmote("/client/resources/images/twitch/" + MultiChatView.TWITCH_EMOTES.get(word.trim()), 40);
+        Platform.runLater(() -> chatLog.getChildren().add(twitchEmote));
+      } else {
+        Text txt = new Text(word + " ");
+        txt.setFill(c);
+        Platform.runLater(() -> chatLog.getChildren().add(txt));
+      }
+    }
+
+    Platform.runLater(() -> chatLog.getChildren().add(new Text("\n")));
+  }
+
+  private ImageView getEmote(String imagePath, int size) {
+    ImageView imageView = new ImageView(
+        new Image(getClass().getResource(imagePath).toExternalForm())
+    );
+    imageView.setFitHeight(size);
+    imageView.setFitWidth(size);
+    return imageView;
+  }
+
 }

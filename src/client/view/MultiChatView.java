@@ -12,7 +12,7 @@ import static java.util.Map.entry;
 
 public interface MultiChatView {
 
-  Map<String, String> EMOTES = Map.ofEntries(
+  Map<String, String> HTML_EMOTES = Map.ofEntries(
       entry("&lt;3", "heart.png"),
       entry(":)", "smiley.png"),
       entry(":(", "frowny.png"),
@@ -21,6 +21,20 @@ public interface MultiChatView {
       entry("D:", "anguish.png"),
       entry(":p", "tongue.png"),
       entry("&gt;:(", "angry.png"),
+      entry(":O", "wow.png"),
+      entry(":|", "neutral.png"),
+      entry(";)", "wink.png")
+  );
+
+  Map<String, String> EMOTES = Map.ofEntries(
+      entry("<3", "heart.png"),
+      entry(":)", "smiley.png"),
+      entry(":(", "frowny.png"),
+      entry(":/", "confused.png"),
+      entry(":D", "excited.png"),
+      entry("D:", "anguish.png"),
+      entry(":p", "tongue.png"),
+      entry(">:(", "angry.png"),
       entry(":O", "wow.png"),
       entry(":|", "neutral.png"),
       entry(";)", "wink.png")
