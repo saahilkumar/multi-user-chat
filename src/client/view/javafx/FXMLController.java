@@ -8,9 +8,11 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -36,6 +38,8 @@ public class FXMLController {
   private TextArea chatField;
   @FXML
   private TextFlow chatLog;
+  @FXML
+  private ScrollPane scrollPane;
 //  @FXML
 //  private CheckMenuItem darkModeMenuItem;
 
@@ -46,6 +50,7 @@ public class FXMLController {
 
   public void setScene(Scene scene) {
     this.scene = scene;
+    scrollPane.vvalueProperty().bind(chatLog.heightProperty());
   }
 
 //  public void setDarkMode() {
@@ -104,7 +109,6 @@ public class FXMLController {
   }
 
   private void appendMessage(String msg, Color c) {
-
     // split message by space
     String[] words = msg.split(" ");
 
@@ -131,18 +135,27 @@ public class FXMLController {
         surface.getChildren().add(txt);
       }
     }
+
     Rectangle rect = new Rectangle();
     rect.setX(0);
     rect.setY(0);
     rect.setWidth(surface.prefWidth(-1));
     rect.setHeight(surface.prefHeight(-1));
-    System.out.println(surface.getWidth() + " " + surface.getHeight());
-    System.out.println(surface.prefWidth(-1));
     rect.setArcWidth(20);
     rect.setArcHeight(20);
-    rect.setFill(Color.CORNFLOWERBLUE);
-
+    if(c.equals(Color.BLACK)) {
+      if(extractName(msg).equals(features.getClientUsername())) {
+        rect.setFill(Color.CORNFLOWERBLUE);
+        bubble.setAlignment(Pos.BASELINE_RIGHT);
+      } else {
+        rect.setFill(Color.LIGHTGREY);
+      }
+    } else {
+      rect.setFill(Color.TRANSPARENT);
+    }
     bubble.getChildren().addAll(rect, surface);
+
+
     Platform.runLater(() -> chatLog.getChildren().add(bubble));
     Platform.runLater(() -> chatLog.getChildren().add(new Text("\n")));
   }
@@ -178,6 +191,10 @@ public class FXMLController {
     buildDate.append(message.substring(message.indexOf("]") + 1));
 
     return buildDate.toString();
+  }
+
+  private String extractName(String msg) {
+    return msg.substring(msg.indexOf("]") + 2).split(": ")[0];
   }
 
 }

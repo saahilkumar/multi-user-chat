@@ -20,6 +20,8 @@ public class MultiChatControllerImpl implements MultiChatController, Feature {
 
   public void run() {
 
+    String clientName = "";
+
     while(model.isConnectionRunning()) {
       String line = model.getSocketInput();
       System.out.println(line);
@@ -27,12 +29,15 @@ public class MultiChatControllerImpl implements MultiChatController, Feature {
       if (line.startsWith("SUBMITNAME")) {
         String username = view.getName("Choose a screen name:");
         model.sendText(username);
+        clientName = username;
       } else if (line.startsWith("SUBMITANOTHERNAME")) {
         String username = view.getName("Please select a different screen name:");
         model.sendText(username);
+        clientName = username;
       } else if (line.startsWith("NAMEACCEPTED")) {
         view.display();
         view.setTextFieldEditable(true);
+        model.setUsername(clientName);
       } else if (line.startsWith("MESSAGE ")) {
         view.appendChatLog(line.substring(8), "black", true);
       } else if (line.startsWith("MESSAGEUSERJOINED ")) {
@@ -71,5 +76,10 @@ public class MultiChatControllerImpl implements MultiChatController, Feature {
   @Override
   public void sendTextOut(String out) {
     model.sendText(out);
+  }
+
+  @Override
+  public String getClientUsername() {
+    return model.getUsername();
   }
 }

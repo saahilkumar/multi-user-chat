@@ -4,4 +4,6 @@ import java.util.Map;
 
 public interface Feature {
   void sendTextOut(String out);
+
+  String getClientUsername();
 }

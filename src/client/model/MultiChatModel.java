@@ -11,4 +11,8 @@ public interface MultiChatModel {
   void sendText(String output);
 
   MultiChatModel switchPorts(String portNumber) throws IOException;
+
+  void setUsername(String username);
+
+  String getUsername();
 }

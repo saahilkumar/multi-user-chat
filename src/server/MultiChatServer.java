@@ -184,7 +184,7 @@ public class MultiChatServer {
           throw new IllegalArgumentException("Supplied a null name.");
         }
         synchronized (names) {
-          if (!name.isBlank() && !names.contains(name) && !name.contains(",")) {
+          if (!name.isBlank() && !names.contains(name) && !name.contains(",") && !name.contains(":")) {
             names.add(name);
             break;
           }
