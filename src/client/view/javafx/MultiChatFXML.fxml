@@ -9,6 +9,7 @@
 <?import javafx.scene.text.TextFlow?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
+<?import javafx.geometry.Insets?>
 <VBox xmlns="http://javafx.com/javafx"
   xmlns:fx="http://javafx.com/fxml"
   fx:controller="client.view.javafx.FXMLController"
@@ -53,7 +54,7 @@
     </VBox>
     <VBox minWidth = "600" alignment="CENTER">
 <!--      <Label textFill="white" style="-fx-background-color: #55AAFF; -fx-font-size: 40" minWidth="600" alignment="CENTER">MultiChat</Label>-->
-      <ImageView fitWidth="600" preserveRatio="true">
+      <ImageView fitWidth="600" fitHeight="100">
         <image>
           <Image url="/client/resources/logo/multichat_full_logo.png"/>
         </image>
@@ -61,7 +62,12 @@
       <ScrollPane minHeight = "450" maxHeight = "450">
         <TextFlow fx:id="chatLog" prefWidth="580"></TextFlow>
       </ScrollPane>
-      <TextArea promptText="Type here..." fx:id="chatField" maxHeight="70" wrapText="true" onKeyPressed="#onEnter"></TextArea>
+      <HBox spacing="10" alignment="CENTER">
+        <padding><Insets top="10" right="10" left="10" bottom="10"/></padding>
+        <Button text="+"></Button>
+        <Separator orientation="VERTICAL"></Separator>
+        <TextArea promptText="Type here..." fx:id="chatField" prefWidth="500" maxHeight="30" wrapText="true" onKeyPressed="#onEnter"></TextArea>
+      </HBox>
     </VBox>
 <!--    <TextArea editable="false" text = "Active Servers:"></TextArea>-->
   </HBox>
