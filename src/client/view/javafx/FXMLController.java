@@ -2,20 +2,17 @@ package client.view.javafx;
 
 import client.controller.Feature;
 import client.view.MultiChatView;
-import client.view.swing.MultiChatViewImpl;
-import java.awt.TextField;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
@@ -32,10 +29,6 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import javafx.scene.text.TextFlow;
-import javafx.scene.web.HTMLEditor;
-import javafx.scene.web.WebView;
-
 
 public class FXMLController {
   private Feature features;
@@ -58,6 +51,8 @@ public class FXMLController {
 
   private ObservableList<String> userList = FXCollections.observableArrayList();
   private ObservableList<String> serverList = FXCollections.observableArrayList();
+
+  private Map<String, Color> nameColors = new HashMap<>();
 
   public void setFeatures(Feature features) {
     this.features = features;
@@ -248,11 +243,20 @@ public class FXMLController {
     Platform.runLater(() -> {
       observableList.clear();
       observableList.addAll(listOfNames);
+      this.mapNameToColor(listOfNames);
       listView.setCellFactory(lv -> new Cell());
     });
   }
 
-  private static class Cell extends ListCell<String> {
+  private void mapNameToColor(List<String> listOfNames) {
+    for(String name : listOfNames) {
+      if(!nameColors.containsKey(name)) {
+        nameColors.put(name, randomColor());
+      }
+    }
+  }
+
+  private class Cell extends ListCell<String> {
     @Override
     public void updateItem(String item, boolean empty) {
       super.updateItem(item, empty);
@@ -265,7 +269,7 @@ public class FXMLController {
         userTile.setPadding(new Insets(3, 3, 3, 3));
         userTile.setSpacing(5);
         userTile.getChildren().addAll(userIcon, new Text(item));
-        userIcon.setFill(randomColor());
+        userIcon.setFill(nameColors.get(item));
         setGraphic(userTile);
       }
     }
