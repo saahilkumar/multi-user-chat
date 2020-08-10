@@ -15,63 +15,49 @@
   fx:controller="client.view.javafx.FXMLController"
   prefHeight="400.0" prefWidth="600.0" fx:id="layout">
 
-  <!--Menu-->
-<!--  <MenuBar>-->
-<!--    <Menu text="MultiChat">-->
-<!--      <MenuItem text="Switch Rooms"></MenuItem>-->
-<!--      <MenuItem text="Private Message"></MenuItem>-->
-<!--    </Menu>-->
-<!--    <Menu text = "View">-->
-<!--      <CheckMenuItem text="Enable Dark Mode" fx:id="darkModeMenuItem" onAction="#setDarkMode"></CheckMenuItem>-->
-<!--      <MenuItem text="Font"></MenuItem>-->
-<!--    </Menu>-->
-<!--    <Menu text="Help">-->
-<!--      <MenuItem text="Help"></MenuItem>-->
-<!--    </Menu>-->
-<!--  </MenuBar>-->
-
   <!--Chat Area-->
   <HBox minHeight="500">
-<!--    <TextArea editable="false" text = "Active Users:"></TextArea>-->
     <VBox>
       <HBox>
-        <ImageView fitWidth="50" fitHeight="50">
+        <ImageView fitWidth = "50" fitHeight="50">
           <image>
-            <Image url="/client/resources/logo/multichat_logo.png"/>
+            <Image url="@/client/resources/logo/multichat_logo.png"/>
           </image>
         </ImageView>
-        <Label text="Settings"></Label>
-        <Label text="Menu"></Label>
       </HBox>
-      <TabPane>
-        <Tab text="Users" closable="false">
-          <Label text="Hello there"></Label>
+      <TabPane prefHeight = "600">
+        <padding> <Insets top = "10" right = "10" bottom = "10" left =  "10" /></padding>
+        <Tab text = "Users" closable="false">
+          <ListView fx:id = "userListView">
+          </ListView>
         </Tab>
-        <Tab text="Servers" closable="false">
-          <Label text="Goodbyte"></Label>
+        <Tab text = "Servers" closable="false">
+          <ListView fx:id = "serverListView">
+          </ListView>
         </Tab>
       </TabPane>
     </VBox>
+
     <VBox minWidth = "600" alignment="CENTER">
-<!--      <Label textFill="white" style="-fx-background-color: #55AAFF; -fx-font-size: 40" minWidth="600" alignment="CENTER">MultiChat</Label>-->
-      <ImageView fitWidth="600" fitHeight="100">
+      <ImageView id="boxImage" fitWidth = "600" fitHeight = "100">
         <image>
-          <Image url="/client/resources/logo/multichat_full_logo.png"/>
+          <Image url="@/client/resources/logo/multichat_full_logo.png"/>
         </image>
       </ImageView>
-      <ScrollPane minHeight = "450" maxHeight = "450" fx:id="scrollPane">
-        <TextFlow fx:id="chatLog" prefWidth="580">
-          <padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
-        </TextFlow>
+      <ScrollPane minHeight = "450" maxHeight = "450" minWidth = "600" fx:id ="scrollPane">
+        <VBox fx:id="chatLog" minWidth = "590" spacing = "3">
+          <padding> <Insets top = "5" right = "5" bottom = "5" left = "5"/></padding>
+        </VBox>
       </ScrollPane>
-      <HBox spacing="10" alignment="CENTER">
-        <padding><Insets top="10" right="10" left="10" bottom="10"/></padding>
-        <Button text="+"></Button>
-        <Separator orientation="VERTICAL"></Separator>
-        <TextArea promptText="Type here..." fx:id="chatField" prefWidth="500" maxHeight="30" wrapText="true" onKeyPressed="#onEnter"></TextArea>
+      <HBox spacing = "10" alignment = "CENTER">
+        <padding> <Insets top = "10" right = "10" bottom = "10" left =  "10" /> </padding>
+        <Button text = "+"></Button>
+        <Separator orientation = "VERTICAL" ></Separator>
+        <TextArea promptText="Type here..." fx:id="chatField" maxHeight="30" wrapText="true"
+          onKeyPressed="#onEnter" prefWidth = "500"> </TextArea>
       </HBox>
     </VBox>
-<!--    <TextArea editable="false" text = "Active Servers:"></TextArea>-->
+
   </HBox>
 
 </VBox>

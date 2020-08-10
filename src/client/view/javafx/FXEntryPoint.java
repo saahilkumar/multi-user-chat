@@ -84,12 +84,12 @@ public class FXEntryPoint extends Application implements MultiChatView {
 
   @Override
   public void setActiveUsers(List<String> activeUsers) {
-
+    controller.setActiveUsers(activeUsers);
   }
 
   @Override
   public void setActiveServers(List<String> activeServers) {
-
+    controller.setActiveServers(activeServers);
   }
 
   @Override
