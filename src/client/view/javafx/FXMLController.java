@@ -35,6 +35,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
@@ -61,7 +62,6 @@ public class FXMLController {
   private ObservableList<String> serverList = FXCollections.observableArrayList();
 
   private Map<String, Color> nameColors = new HashMap<>();
-  private Map<Integer, Double> serverCapacities = new HashMap<>();
 
   public void setFeatures(Feature features) {
     this.features = features;
@@ -109,9 +109,9 @@ public class FXMLController {
 
   public void appendChatLog(String s, String color, boolean hasDate) {
     if(hasDate) {
-      appendMessage(formatDate(s), getColor(color));
+      appendMessage(formatDate(s), getColor(color), true);
     } else {
-      appendMessage(s, getColor(color));
+      appendMessage(s, getColor(color), false);
     }
   }
 
@@ -130,31 +130,100 @@ public class FXMLController {
     }
   }
 
-  private void appendMessage(String msg, Color c) {
-    // split message by space to check for emotes
-    String[] words = msg.split(" ");
+//  private void appendMessage(String msg, Color c, boolean hasDate) {
+//    String date;
+//    if(hasDate) {
+//      date = retrieveDate(msg);
+//      String restOfMessage = msg.substring(msg.indexOf("]") + 1);
+//    } else {
+//    }
+//
+//    // split message by space to check for emotes
+//    String[] words = msg.split(" ");
+//
+//
+//    Platform.runLater(() -> {
+//      StackPane bubbleWithMsg = new StackPane(); //stacks the text on top of a chat bubble
+//      bubbleWithMsg.setMaxWidth(Double.MAX_VALUE); //the stackpane fills to the width of chatlog
+//
+//      if (!c.equals(Color.BLACK)) {
+//        bubbleWithMsg.setAlignment(Pos.CENTER); //if it is not user text, center it (ie. black text messages)
+//      } else if (extractName(msg).equals(features.getClientUsername())) {
+//        //if it is user text and sent by the user, align to right
+//        bubbleWithMsg.setAlignment(Pos.BASELINE_RIGHT);
+//      } else {
+//        //if it is user text and not sent by the user, align to left
+//        bubbleWithMsg.setAlignment(Pos.BASELINE_LEFT);
+//      }
+//
+//      HBox surface = textMessageWithImages(words, c); //contains the texts and images sent
+//      Rectangle rect = getBubbleGraphic(surface, msg, c); //the bubble underneath
+//      Group text = new Group(surface); //holds the surface HBox to ensure stackpane alignment affects all children
+//
+//      bubbleWithMsg.getChildren().addAll(rect, text); //have the stackpane include text and a bubble underneath
+//      chatLog.getChildren().add(bubbleWithMsg); //append the stackpane to the chatlog
+//    });
+//  }
+  private void appendMessage(String msg, Color c, boolean hasDate) {
+    String date;
+    String restOfMessage;
+    String[] words;
+    if (hasDate) {
+      date = retrieveDate(msg);
+      restOfMessage = msg.substring(msg.indexOf("]") + 1);
+      words = restOfMessage.split(" ");
+    } else {
+      // split message by space to check for emotes
+      date = "";
+      restOfMessage = "";
+      words = msg.split(" ");
+    }
 
     Platform.runLater(() -> {
+      VBox messageContainer = new VBox();
       StackPane bubbleWithMsg = new StackPane(); //stacks the text on top of a chat bubble
-      bubbleWithMsg.setMaxWidth(Double.MAX_VALUE); //the stackpane fills to the width of chatlog
+      messageContainer.setMaxWidth(Double.MAX_VALUE); //the stackpane fills to the width of chatlog
+      bubbleWithMsg.setMaxWidth(Double.MAX_VALUE);
 
       if (!c.equals(Color.BLACK)) {
+        messageContainer.setAlignment(Pos.CENTER); //if it is not user text, center it (ie. black text messages)
         bubbleWithMsg.setAlignment(Pos.CENTER); //if it is not user text, center it (ie. black text messages)
       } else if (extractName(msg).equals(features.getClientUsername())) {
         //if it is user text and sent by the user, align to right
+        messageContainer.setAlignment(Pos.BASELINE_RIGHT);
         bubbleWithMsg.setAlignment(Pos.BASELINE_RIGHT);
       } else {
         //if it is user text and not sent by the user, align to left
+        messageContainer.setAlignment(Pos.BASELINE_LEFT);
         bubbleWithMsg.setAlignment(Pos.BASELINE_LEFT);
       }
 
       HBox surface = textMessageWithImages(words, c); //contains the texts and images sent
-      Rectangle rect = getBubbleGraphic(surface, msg, c); //the bubble underneath
-      Group text = new Group(surface); //holds the surface HBox to ensure stackpane alignment affects all children
+      //holds the surface HBox to ensure stackpane alignment affects all children
+      Group message = new Group(surface);
+      Rectangle rect;
 
-      bubbleWithMsg.getChildren().addAll(rect, text); //have the stackpane include text and a bubble underneath
-      chatLog.getChildren().add(bubbleWithMsg); //append the stackpane to the chatlog
+      if (hasDate) {
+        Text dateText = new Text(date);
+        dateText.setFill(Color.GRAY);
+        dateText.setFont(new Font("Verdana", 10));
+        rect = getBubbleGraphic(surface, restOfMessage, c); //the bubble underneath
+        //have the stackpane include text and a bubble underneath
+        bubbleWithMsg.getChildren().addAll(rect, message);
+        messageContainer.getChildren().addAll(bubbleWithMsg, dateText);
+        chatLog.getChildren().add(messageContainer); //append the stackpane to the chatlog
+      } else {
+        rect = getBubbleGraphic(surface, msg, c); //the bubble underneath
+        //have the stackpane include text and a bubble underneath
+        bubbleWithMsg.getChildren().addAll(rect, message);
+        messageContainer.getChildren().addAll(bubbleWithMsg);
+        chatLog.getChildren().add(messageContainer); //append the stackpane to the chatlog
+      }
     });
+  }
+
+  private String retrieveDate(String msg) {
+    return msg.substring(0, msg.indexOf("]") + 1);
   }
 
   private HBox textMessageWithImages(String[] words, Color c) {
@@ -302,7 +371,7 @@ public class FXMLController {
 //          int green = (int)(serverCapacities.get(roomNum) * 255);
 //          System.out.println("Green: " + green + " Red: " + (255-green));
 //          userIcon.setFill(Color.web(String.format("rgb(%d,%d,%d)", 255 - green, green, 0)));
-          userIcon.setFill(Color.RED);
+          userIcon.setFill(Color.LIGHTGREEN);
           MenuItem join = new MenuItem("Join");
           join.setOnAction(e -> {
             features.sendTextOut("/join " + roomNum);
