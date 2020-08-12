@@ -34,6 +34,8 @@ public class MultiChatServer {
 
   private static HashSet<String> serverNames = new HashSet();
 
+  private static int possibleAmountOfClients;
+
   /**
    * Main method to start the MultiChat server and listens for 1<=x<=args connections on local port
    * 59090 where args is the desired number of possible clients (default 30). Creating a thread for
@@ -47,7 +49,6 @@ public class MultiChatServer {
    */
   public static void main(String[] args) throws IllegalArgumentException,
       NumberFormatException {
-    int possibleAmountOfClients;
     if (args.length == 2) {
       possibleAmountOfClients = Integer.parseInt(args[1]);
     } else if (args.length == 1) {

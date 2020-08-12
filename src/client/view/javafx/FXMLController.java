@@ -2,9 +2,12 @@ package client.view.javafx;
 
 import client.controller.Feature;
 import client.view.MultiChatView;
+import java.awt.Choice;
+import java.awt.Menu;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -12,9 +15,14 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
@@ -53,6 +61,7 @@ public class FXMLController {
   private ObservableList<String> serverList = FXCollections.observableArrayList();
 
   private Map<String, Color> nameColors = new HashMap<>();
+  private Map<Integer, Double> serverCapacities = new HashMap<>();
 
   public void setFeatures(Feature features) {
     this.features = features;
@@ -231,20 +240,20 @@ public class FXMLController {
   }
 
   public void setActiveUsers(List<String> activeUsers) {
-    setActiveList(activeUsers, this.userList, this.userListView);
+    setActiveList(activeUsers, this.userList, this.userListView, true);
   }
 
   public void setActiveServers(List<String> activeServers) {
-    setActiveList(activeServers, this.serverList, this.serverListView);
+    setActiveList(activeServers, this.serverList, this.serverListView, false);
   }
 
   private void setActiveList(List<String> listOfNames, ObservableList<String> observableList,
-      ListView<String> listView) {
+      ListView<String> listView, boolean isUserList) {
     Platform.runLater(() -> {
       observableList.clear();
       observableList.addAll(listOfNames);
       this.mapNameToColor(listOfNames);
-      listView.setCellFactory(lv -> new Cell());
+      listView.setCellFactory(lv -> new Cell(isUserList));
     });
   }
 
@@ -257,6 +266,13 @@ public class FXMLController {
   }
 
   private class Cell extends ListCell<String> {
+
+    boolean isUserList;
+
+    private Cell(boolean isUserList) {
+      this.isUserList = isUserList;
+    }
+
     @Override
     public void updateItem(String item, boolean empty) {
       super.updateItem(item, empty);
@@ -264,16 +280,55 @@ public class FXMLController {
         setText(null);
         setGraphic(null);
       } else if (item != null) {
+        MenuButton button;
         Circle userIcon = new Circle(5);
-        HBox userTile = new HBox();
-        userTile.setPadding(new Insets(3, 3, 3, 3));
-        userTile.setSpacing(5);
-        userTile.getChildren().addAll(userIcon, new Text(item));
-        userIcon.setFill(nameColors.get(item));
-        setGraphic(userTile);
+        if(isUserList) {
+          userIcon.setFill(nameColors.get(item));
+
+          MenuItem privateMessage = new MenuItem("Private Message");
+          MenuItem kick = new MenuItem("Kick");
+          button = new MenuButton(item, userIcon, privateMessage, kick);
+        } else {
+          int roomNum = Integer.parseInt(item.split(" ")[1]);
+//          features.requestRoomCapacity(roomNum);
+//          confirmUpdatedServerLatch = new CountDownLatch(1);
+//          try {
+//            confirmUpdatedServerLatch.await();
+//          } catch(InterruptedException ie) {
+//            System.out.println("Unable to server latch!");
+//            System.exit(3);
+//          }
+
+//          int green = (int)(serverCapacities.get(roomNum) * 255);
+//          System.out.println("Green: " + green + " Red: " + (255-green));
+//          userIcon.setFill(Color.web(String.format("rgb(%d,%d,%d)", 255 - green, green, 0)));
+          userIcon.setFill(Color.RED);
+          MenuItem join = new MenuItem("Join");
+          join.setOnAction(e -> {
+            features.sendTextOut("/join " + roomNum);
+          });
+          button = new MenuButton(item, userIcon, join);
+        }
+
+        button.setMaxWidth(Double.MAX_VALUE);
+        setGraphic(button);
       }
     }
   }
+//
+//  private class UserInfo {
+//    String name;
+//    Color col;
+//
+//    private UserInfo(String name, Color col) {
+//      this.name = name;
+//      this.col = col;
+//    }
+//
+//    private Color getColor() {
+//      return this.col;
+//    }
+//  }
 
   private static Color randomColor() {
     int red = ((int)(Math.random() * 255)) + 1;

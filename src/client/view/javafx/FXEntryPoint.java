@@ -104,11 +104,12 @@ public class FXEntryPoint extends Application implements MultiChatView {
     VBox flowPane = loader.load();
     // Get the Controller from the FXMLLoader
     controller = loader.getController();
-    Scene scene = new Scene(flowPane, 800, 600);
+    Scene scene = new Scene(flowPane, 800, 630);
     controller.setScene(scene);
     window.setScene(scene);
     window.setTitle("MultiChat");
     window.setOnCloseRequest(e -> feature.sendTextOut("/quit"));
+    window.setResizable(false);
     window.getIcons().add(new Image(this.getClass().getResourceAsStream("/client/resources/logo/multichat_logo.png")));
     initLatch.countDown();
   }
