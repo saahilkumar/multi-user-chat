@@ -10,9 +10,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,7 +31,8 @@ import javax.net.ssl.SSLSocket;
 public class MultiChatServer {
 
   //holds the names of active clients
-  private static HashSet<String> names = new HashSet<>();
+//  private static HashSet<String> names = new HashSet<>();
+  private static Map<String, Socket> users = new HashMap<>();
 
   //a set of writers that write to the output of a client's socket
   private static HashSet<PrintWriter> outputWriters = new HashSet<>();
@@ -40,6 +44,7 @@ public class MultiChatServer {
   private static String curVictim = null;
   private static int numVotes = 0;
   private static Timer kickTimer = new Timer();
+  private static Set alreadyVoted = new HashSet<>();
 
   /**
    * Main method to start the MultiChat server and listens for 1<=x<=args connections on local port
@@ -189,9 +194,9 @@ public class MultiChatServer {
           userLeave();
           throw new IllegalArgumentException("Supplied a null name.");
         }
-        synchronized (names) {
-          if (!name.isBlank() && !names.contains(name) && !name.contains(",") && !name.contains(":")) {
-            names.add(name);
+        synchronized (users) {
+          if (!name.isBlank() && !users.keySet().contains(name) && !name.contains(",") && !name.contains(":")) {
+            users.put(name, clientSocket);
             break;
           }
         }
@@ -249,7 +254,7 @@ public class MultiChatServer {
       }
       if (name != null) {
         System.out.println("[" + new Date().toString() + "] " + name + " has left.");
-        names.remove(name);
+        users.remove(name);
         for (PrintWriter writer : outputWriters) {
           writer.println("MESSAGEUSERLEFT " + "[" + new Date().toString() + "] " + name
               + " has left");
@@ -286,13 +291,23 @@ public class MultiChatServer {
     }
 
     private void printVotekickMessage(String victim) {
-      if(!names.contains(victim)) {
+      if(alreadyVoted.contains(name)) {
+        out.println("FAILEDVOTEKICK You already voted to kick " + victim + "!");
+        return;
+      }
+
+      if(victim.equals(name)) {
+        out.println("FAILEDVOTEKICK You can't kick yourself!");
+        return;
+      }
+
+      if(!users.keySet().contains(victim)) {
         out.println("FAILEDVOTEKICK There is no one here named " + victim);
         return;
       }
 
       if(curVictim != null & !victim.equals(curVictim)) {
-        out.println("FAILEDVOTEKICK You cannot kick " + victim + " because someone else is currently being voted on");
+        out.println("FAILEDVOTEKICK You cannot kick " + victim + " because someone else is currently being voted on.");
         return;
       }
 
@@ -316,6 +331,7 @@ public class MultiChatServer {
                 }
                 curVictim = null;
                 numVotes = 0;
+                alreadyVoted.clear();
                 cancel();
               }
             },
@@ -327,36 +343,44 @@ public class MultiChatServer {
         out.println("VOTEKICK You have voted to kick " + victim + "!");
 
         // if the majority voted to kick
-        if(numVotes > names.size() / 2) {
+        if(numVotes > users.size() / 2) {
           kickUser();
           return;
         }
       }
 
+      alreadyVoted.add(name);
+
     }
 
     private void kickUser() {
       for(PrintWriter writer : outputWriters) {
-        writer.println("FAILEDVOTEKICK " + curVictim + " was kicked!");
+        writer.println("SUCCESSFULVOTEKICK " + curVictim + " was kicked!");
       }
 
-      if(name.equals(curVictim)) {
-        userLeave();
+      try {
+        users.get(curVictim).close();
+        users.remove(curVictim);
+        updateActiveUsers();
+      } catch (IOException ioe) {
+        System.out.println(ioe.getMessage());
+      } finally {
+        // reset values
+        numVotes = 0;
+        curVictim = null;
+
+        // cancel the timer
+        kickTimer.cancel();
+
+        alreadyVoted.clear();
       }
-
-      // reset values
-      numVotes = 0;
-      curVictim = null;
-
-      // cancel the timer
-      kickTimer.cancel();
     }
 
     private void updateActiveUsers() {
       for (PrintWriter writer : outputWriters) {
         StringBuilder activeUserList = new StringBuilder();
         activeUserList.append("ACTIVEUSERLIST ");
-        for (String name : names) {
+        for (String name : users.keySet()) {
           activeUserList.append(name + ",");
         }
         writer.println(activeUserList.toString());

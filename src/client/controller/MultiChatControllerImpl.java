@@ -60,6 +60,8 @@ public class MultiChatControllerImpl implements MultiChatController, Feature {
         view.appendChatLog(line.substring(9), "orange", false);
       } else if(line.startsWith("FAILEDVOTEKICK ")) {
         view.appendChatLog(line.substring(15), "red", false);
+      } else if(line.startsWith("SUCCESSFULVOTEKICK ")) {
+        view.appendChatLog(line.substring(19), "red", false);
       } else if (line.startsWith("REQUESTEDNEWROOM ")) {
         try {
           MultiChatModel newModel = model.switchPorts(line.substring(17));
