@@ -44,7 +44,7 @@ public class FXMLController {
   @FXML
   private ScrollPane scrollPane;
   @FXML
-  private HBox test;
+  private HBox fileButtons;
 
   @FXML
   private ListView<String> userListView = new ListView<>();
@@ -55,8 +55,8 @@ public class FXMLController {
   private ObservableList<String> serverList = FXCollections.observableArrayList();
   private Map<String, Color> nameColors = new HashMap<>();
 
-  private TranslateTransition slideLeft;
-  private TranslateTransition slideRight;
+  private TranslateTransition slideUp;
+  private TranslateTransition slideDown;
 
   public void setFeatures(Feature features) {
     this.features = features;
@@ -302,10 +302,10 @@ public class FXMLController {
   @FXML
   private void showButtonPanel() {
     Platform.runLater(() -> {
-      if(test.getTranslateX() == 600){
-        slideLeft.play();
+      if(fileButtons.getTranslateY() == 450){
+        slideUp.play();
       }else{
-        slideRight.play();
+        slideDown.play();
       }
     });
   }
@@ -334,7 +334,17 @@ public class FXMLController {
           MenuItem kick = new MenuItem("Kick");
           kick.setOnAction(e -> features.sendTextOut("/votekick " + item));
 
-          button = new MenuButton(item, userIcon, privateMessage, kick);
+          MenuItem whisper = new MenuItem("Whisper");
+          whisper.setOnAction(e -> {
+            Platform.runLater(() -> {
+              chatField.setText("/whisper " + item + " " + chatField.getText());
+              chatField.requestFocus();
+              chatField.positionCaret(chatField.getText().length());
+            });
+          });
+
+
+          button = new MenuButton(item, userIcon, privateMessage, whisper, kick);
         } else {
           int roomNum = Integer.parseInt(item.split(" ")[1]);
           userIcon.setFill(Color.GREEN);
@@ -363,10 +373,10 @@ public class FXMLController {
   }
 
   private void prepareButtonAnimation() {
-    slideLeft = new TranslateTransition(new Duration(350), test);
-    slideLeft.setToX(0);
-    slideRight = new TranslateTransition(new Duration(350), test);
-    slideRight.setToX(600);
+    slideUp = new TranslateTransition(new Duration(300), fileButtons);
+    slideUp.setToY(400);
+    slideDown = new TranslateTransition(new Duration(300), fileButtons);
+    slideDown.setToY(450);
 
   }
 

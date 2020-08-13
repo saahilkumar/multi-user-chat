@@ -51,11 +51,11 @@
           <ScrollPane minHeight="450" maxHeight="450" minWidth="600" fx:id="scrollPane">
             <VBox fx:id="chatLog" minWidth="590" spacing="3">
               <padding>
-                <Insets top="5" right="5" bottom="5" left="5"/>
+                <Insets top="8" right="8" bottom="8" left="8"/>
               </padding>
             </VBox>
           </ScrollPane>
-          <HBox fx:id = "test" prefHeight = "50" translateY = "400" translateX = "600" spacing = "10">
+          <HBox fx:id = "fileButtons" prefHeight = "50" translateY = "450" spacing = "10">
             <padding>
               <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
@@ -70,10 +70,23 @@
         <padding>
           <Insets top="10" right="10" bottom="10" left="10"/>
         </padding>
-        <Button text="+" onAction="#showButtonPanel"></Button>
+        <style>
+          -fx-background-color: rgba(0, 175, 255, 1)
+        </style>
+        <Button text="+" onAction="#showButtonPanel">
+          <style>
+            -fx-background-radius: 5em;
+            -fx-font-size: 15px;
+          </style>
+        </Button>
         <Separator orientation="VERTICAL"></Separator>
         <TextArea promptText="Type here..." fx:id="chatField" maxHeight="30" wrapText="true"
-          onKeyPressed="#onEnter" prefWidth="500"></TextArea>
+          onKeyPressed="#onEnter" prefWidth="500">
+<!--          <style>-->
+<!--            -fx-border-radius: 10 10 0 0;-->
+<!--            -fx-background-radius: 10 10 0 0;-->
+<!--          </style>-->
+        </TextArea>
       </HBox>
     </VBox>
 
