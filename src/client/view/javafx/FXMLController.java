@@ -87,15 +87,15 @@ public class FXMLController {
     }
   }
 
-  public void appendChatLog(String s, String color, boolean hasDate) {
+  public void appendChatLog(String s, String color, boolean hasDate, String protocol) {
     if (hasDate) {
-      appendMessage(formatDate(s), getColor(color), hasDate);
+      appendMessage(formatDate(s), getColor(color), hasDate, protocol);
     } else {
-      appendMessage(s, getColor(color), hasDate);
+      appendMessage(s, getColor(color), hasDate, protocol);
     }
   }
 
-  private void appendMessage(String msg, Color c, boolean hasDate) {
+  private void appendMessage(String msg, Color c, boolean hasDate, String protocol) {
     String date;
     String restOfMessage;
     String[] words;
@@ -116,7 +116,7 @@ public class FXMLController {
       messageContainer.setMaxWidth(Double.MAX_VALUE); //the stackpane fills to the width of chatlog
       bubbleWithMsg.setMaxWidth(Double.MAX_VALUE);
 
-      if (!c.equals(Color.BLACK)) {
+      if (!protocol.equals("MESSAGE") && !protocol.equals("WHISPER")) {
         messageContainer.setAlignment(Pos.CENTER); //if it is not user text, center it (ie. black text messages)
         bubbleWithMsg.setAlignment(Pos.CENTER); //if it is not user text, center it (ie. black text messages)
       } else if (extractName(msg).equals(features.getClientUsername())) {
@@ -138,13 +138,13 @@ public class FXMLController {
         Text dateText = new Text(date);
         dateText.setFill(Color.GREY);
         dateText.setFont(new Font("Verdana", 8));
-        rect = getBubbleGraphic(surface, restOfMessage, c); //the bubble underneath
+        rect = getBubbleGraphic(surface, restOfMessage, protocol); //the bubble underneath
         //have the stackpane include text and a bubble underneath
         bubbleWithMsg.getChildren().addAll(rect, message);
         messageContainer.getChildren().addAll(bubbleWithMsg, dateText);
         chatLog.getChildren().add(messageContainer); //append the stackpane to the chatlog
       } else {
-        rect = getBubbleGraphic(surface, msg, c); //the bubble underneath
+        rect = getBubbleGraphic(surface, msg, protocol); //the bubble underneath
         //have the stackpane include text and a bubble underneath
         bubbleWithMsg.getChildren().addAll(rect, message);
         messageContainer.getChildren().addAll(bubbleWithMsg);
@@ -178,7 +178,7 @@ public class FXMLController {
     return surface;
   }
 
-  private Rectangle getBubbleGraphic(HBox surface, String msg, Color c) {
+  private Rectangle getBubbleGraphic(HBox surface, String msg, String protocol) {
     Rectangle rect = new Rectangle();
     rect.setX(0);
     rect.setY(0);
@@ -186,12 +186,14 @@ public class FXMLController {
     rect.setHeight(surface.prefHeight(-1));
     rect.setArcWidth(20);
     rect.setArcHeight(20);
-    if (c.equals(Color.BLACK)) {
+    if (protocol.equals("MESSAGE")) {
       if (extractName(msg).equals(features.getClientUsername())) {
         rect.setFill(Color.CORNFLOWERBLUE);
       } else {
         rect.setFill(Color.LIGHTGREY);
       }
+    } else if(protocol.equals("WHISPER")) {
+      rect.setFill(Color.HOTPINK);
     } else {
       rect.setFill(Color.TRANSPARENT);
     }
@@ -217,6 +219,8 @@ public class FXMLController {
         return Color.GREEN;
       case "orange":
         return Color.ORANGE;
+      case "white":
+        return Color.WHITE;
       default:
         return Color.BLACK;
     }
@@ -337,7 +341,7 @@ public class FXMLController {
           MenuItem whisper = new MenuItem("Whisper");
           whisper.setOnAction(e -> {
             Platform.runLater(() -> {
-              chatField.setText("/whisper " + item + " " + chatField.getText());
+              chatField.setText("/whisper " + item + "/ " + chatField.getText());
               chatField.requestFocus();
               chatField.positionCaret(chatField.getText().length());
             });

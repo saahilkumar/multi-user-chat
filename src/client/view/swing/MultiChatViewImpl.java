@@ -141,7 +141,7 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
   }
 
   @Override
-  public void appendChatLog(String s, String color, boolean hasDate) {
+  public void appendChatLog(String s, String color, boolean hasDate, String protocol) {
     String toAdd = "";
     if(hasDate) {
       toAdd = "<pre><span style=\"font-size: 9px;color:"+ color +"\">" + convertEmote(removeHtml(formatDate(s))) + " </span></pre>";
@@ -152,7 +152,7 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
         s = s.substring(s.indexOf(user) + user.length() + 1);
 
         // recursive call of appendChatLog but this time with padded spaces instead of date/name
-        appendChatLog(String.format("%-" + (dateLength + prevName.length() + 2) + "s", "") + s, color, false);
+        appendChatLog(String.format("%-" + (dateLength + prevName.length() + 2) + "s", "") + s, color, false, protocol);
         return;
       }
       prevName = user;

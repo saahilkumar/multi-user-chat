@@ -39,34 +39,36 @@ public class MultiChatControllerImpl implements MultiChatController, Feature {
         view.setTextFieldEditable(true);
         model.setUsername(clientName);
       } else if (line.startsWith("MESSAGE ")) {
-        view.appendChatLog(line.substring(8), "black", true);
+        view.appendChatLog(line.substring(8), "black", true, "MESSAGE");
       } else if (line.startsWith("MESSAGEUSERJOINED ")) {
-        view.appendChatLog(line.substring(18), "green", true);
+        view.appendChatLog(line.substring(18), "green", true, "MESSAGEUSERJOINED");
       } else if (line.startsWith("MESSAGEUSERLEFT ")) {
-        view.appendChatLog(line.substring(16), "red", true);
+        view.appendChatLog(line.substring(16), "red", true, "MESSAGEUSERLEFT");
       } else if (line.startsWith("MESSAGEWELCOME ")) {
-        view.appendChatLog(line.substring(15), "blue", false);
+        view.appendChatLog(line.substring(15), "blue", false, "MESSAGEWELCOME");
       } else if (line.startsWith("ACTIVEUSERLIST ")) {
         String[] arr = line.substring(15).split(",");
         List<String> names = new ArrayList<>(Arrays.asList(arr));
         view.setActiveUsers(names);
       } else if (line.startsWith("MESSAGEHELP ")) {
-        view.appendChatLog(line.substring(12), "orange", false);
+        view.appendChatLog(line.substring(12), "orange", false, "MESSAGEHELP");
       } else if (line.startsWith("ACTIVESERVERLIST ")) {
         String[] arr = line.substring(17).split(",");
         List<String> servers = new ArrayList<>(Arrays.asList(arr));
         view.setActiveServers(servers);
       } else if(line.startsWith("VOTEKICK ")) {
-        view.appendChatLog(line.substring(9), "orange", false);
+        view.appendChatLog(line.substring(9), "orange", false, "VOTEKICK");
       } else if(line.startsWith("FAILEDVOTEKICK ")) {
-        view.appendChatLog(line.substring(15), "red", false);
+        view.appendChatLog(line.substring(15), "red", false, "FAILEDVOTEKICK");
       } else if(line.startsWith("SUCCESSFULVOTEKICK ")) {
-        view.appendChatLog(line.substring(19), "red", false);
+        view.appendChatLog(line.substring(19), "red", false, "SUCCESSFULVOTEKICK");
+      } else if(line.startsWith("WHISPER ")) {
+        view.appendChatLog(line.substring(8), "white", true, "WHISPER");
       } else if (line.startsWith("REQUESTEDNEWROOM ")) {
         try {
           MultiChatModel newModel = model.switchPorts(line.substring(17));
           model.sendText("/quit");
-          view.appendChatLog("Successfully left.", "red", false);
+          view.appendChatLog("Successfully left.", "red", false, "REQUESTEDNEWROOM");
           model = newModel;
         } catch (IOException e) {
           model.sendText("UNSUCCESSFULROOMCHANGE Cannot connect to new chat room.");

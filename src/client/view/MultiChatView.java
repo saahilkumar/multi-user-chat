@@ -70,7 +70,7 @@ public interface MultiChatView {
 
   void display();
 
-  void appendChatLog(String s, String color, boolean hasDate);
+  void appendChatLog(String s, String color, boolean hasDate, String protocol);
 
   void setActiveUsers(List<String> names);
 

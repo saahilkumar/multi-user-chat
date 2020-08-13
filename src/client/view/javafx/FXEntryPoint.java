@@ -79,8 +79,8 @@ public class FXEntryPoint extends Application implements MultiChatView {
   }
 
   @Override
-  public void appendChatLog(String s, String color, boolean hasDate) {
-    controller.appendChatLog(s, color, hasDate);
+  public void appendChatLog(String s, String color, boolean hasDate, String protocol) {
+    controller.appendChatLog(s, color, hasDate, protocol);
   }
 
   @Override

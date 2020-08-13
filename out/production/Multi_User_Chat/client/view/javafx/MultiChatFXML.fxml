@@ -82,10 +82,10 @@
         <Separator orientation="VERTICAL"></Separator>
         <TextArea promptText="Type here..." fx:id="chatField" maxHeight="30" wrapText="true"
           onKeyPressed="#onEnter" prefWidth="500">
-          <style>
-            -fx-border-radius: 10 10 0 0;
-            -fx-background-radius: 10 10 0 0;
-          </style>
+<!--          <style>-->
+<!--            -fx-border-radius: 10 10 0 0;-->
+<!--            -fx-background-radius: 10 10 0 0;-->
+<!--          </style>-->
         </TextArea>
       </HBox>
     </VBox>
