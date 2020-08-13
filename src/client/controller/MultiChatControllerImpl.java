@@ -56,6 +56,10 @@ public class MultiChatControllerImpl implements MultiChatController, Feature {
         String[] arr = line.substring(17).split(",");
         List<String> servers = new ArrayList<>(Arrays.asList(arr));
         view.setActiveServers(servers);
+      } else if(line.startsWith("VOTEKICK ")) {
+        view.appendChatLog(line.substring(9), "orange", false);
+      } else if(line.startsWith("FAILEDVOTEKICK ")) {
+        view.appendChatLog(line.substring(15), "red", false);
       } else if (line.startsWith("REQUESTEDNEWROOM ")) {
         try {
           MultiChatModel newModel = model.switchPorts(line.substring(17));

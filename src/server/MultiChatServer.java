@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.net.ssl.KeyManagerFactory;
@@ -35,6 +36,10 @@ public class MultiChatServer {
   private static HashSet<String> serverNames = new HashSet();
 
   private static int possibleAmountOfClients;
+
+  private static String curVictim = null;
+  private static int numVotes = 0;
+  private static Timer kickTimer = new Timer();
 
   /**
    * Main method to start the MultiChat server and listens for 1<=x<=args connections on local port
@@ -227,6 +232,8 @@ public class MultiChatServer {
           out.println("REQUESTEDNEWROOM " + input.substring(6));
         } else if (input.startsWith("UNSUCCESSFULROOMCHANGE ")) {
           out.println("MESSAGEHELP " + input.substring(23));
+        } else if(input.toLowerCase().startsWith("/votekick ")) {
+          printVotekickMessage(input.substring(10));
         } else {
           for (PrintWriter writer : outputWriters) {
             writer.println("MESSAGE " + "[" + new Date().toString() + "] " + name + ": " +input);
@@ -276,6 +283,73 @@ public class MultiChatServer {
       out.println("MESSAGEHELP Quirky :p :  \":p\"");
       out.println("MESSAGEHELP Pepega( Pepega ) : \"Pepega\"");
       out.println("MESSAGEHELP Pepehands( Pepehands ): \"Pepehands\"");
+    }
+
+    private void printVotekickMessage(String victim) {
+      if(!names.contains(victim)) {
+        out.println("FAILEDVOTEKICK There is no one here named " + victim);
+        return;
+      }
+
+      if(curVictim != null & !victim.equals(curVictim)) {
+        out.println("FAILEDVOTEKICK You cannot kick " + victim + " because someone else is currently being voted on");
+        return;
+      }
+
+      // if this is the first vote for someone, then start the votekick
+      if(curVictim == null) {
+        for(PrintWriter writer : outputWriters) {
+          writer.println("VOTEKICK Someone has started a votekick for " + victim + "!");
+        }
+        numVotes = 1;
+        curVictim = victim;
+
+        // after ten seconds, the votekick ends
+        // ask david to clean this up lol, idk how lambdas work
+        kickTimer = new Timer();
+        kickTimer.schedule(
+            new java.util.TimerTask() {
+              @Override
+              public void run() {
+                for(PrintWriter writer : outputWriters) {
+                  writer.println("FAILEDVOTEKICK The votekick for " + victim + " has run out of time!");
+                }
+                curVictim = null;
+                numVotes = 0;
+                cancel();
+              }
+            },
+            20000
+        );
+
+      } else {
+        numVotes++;
+        out.println("VOTEKICK You have voted to kick " + victim + "!");
+
+        // if the majority voted to kick
+        if(numVotes > names.size() / 2) {
+          kickUser();
+          return;
+        }
+      }
+
+    }
+
+    private void kickUser() {
+      for(PrintWriter writer : outputWriters) {
+        writer.println("FAILEDVOTEKICK " + curVictim + " was kicked!");
+      }
+
+      if(name.equals(curVictim)) {
+        userLeave();
+      }
+
+      // reset values
+      numVotes = 0;
+      curVictim = null;
+
+      // cancel the timer
+      kickTimer.cancel();
     }
 
     private void updateActiveUsers() {

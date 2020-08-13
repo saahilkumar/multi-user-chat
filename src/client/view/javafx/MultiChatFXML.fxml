@@ -13,51 +13,133 @@
 <VBox xmlns="http://javafx.com/javafx"
   xmlns:fx="http://javafx.com/fxml"
   fx:controller="client.view.javafx.FXMLController"
-  prefHeight="400.0" prefWidth="600.0" fx:id="layout">
+  prefWidth="600.0" fx:id="layout">
 
-  <!--Chat Area-->
   <HBox minHeight="500">
-    <VBox>
+    <VBox minWidth="200">
       <HBox>
-        <ImageView fitWidth = "50" fitHeight="50">
+        <ImageView fitWidth="50" fitHeight="50">
           <image>
             <Image url="@/client/resources/logo/multichat_logo.png"/>
           </image>
         </ImageView>
       </HBox>
-      <TabPane prefHeight = "600">
-        <padding> <Insets top = "10" right = "10" bottom = "10" left =  "10" /></padding>
-        <Tab text = "Users" closable="false">
-          <ListView fx:id = "userListView">
+      <TabPane>
+        <padding>
+          <Insets top="10" right="10" bottom="10" left="10"/>
+        </padding>
+        <Tab text="Users" closable="false">
+          <ListView fx:id="userListView">
           </ListView>
         </Tab>
-        <Tab text = "Servers" closable="false">
-          <ListView fx:id = "serverListView">
+        <Tab text="Servers" closable="false">
+          <ListView fx:id="serverListView">
           </ListView>
         </Tab>
       </TabPane>
     </VBox>
 
-    <VBox minWidth = "600" alignment="CENTER">
-      <ImageView id="boxImage" fitWidth = "600" fitHeight = "100">
-        <image>
-          <Image url="@/client/resources/logo/multichat_full_logo.png"/>
-        </image>
-      </ImageView>
-      <ScrollPane minHeight = "450" maxHeight = "450" minWidth = "600" fx:id ="scrollPane">
-        <VBox fx:id="chatLog" minWidth = "590" spacing = "3">
-          <padding> <Insets top = "5" right = "5" bottom = "5" left = "5"/></padding>
-        </VBox>
-      </ScrollPane>
-      <HBox spacing = "10" alignment = "CENTER">
-        <padding> <Insets top = "10" right = "10" bottom = "10" left =  "10" /> </padding>
-        <Button text = "+"></Button>
-        <Separator orientation = "VERTICAL" ></Separator>
+    <!--Chat Area-->
+    <VBox alignment="CENTER">
+      <VBox maxHeight = "550">
+        <ImageView id="boxImage" fitWidth="600" fitHeight="100">
+          <image>
+            <Image url="@/client/resources/logo/multichat_full_logo.png"/>
+          </image>
+        </ImageView>
+        <StackPane maxHeight = "450">
+          <ScrollPane minHeight="450" maxHeight="450" minWidth="600" fx:id="scrollPane">
+            <VBox fx:id="chatLog" minWidth="590" spacing="3">
+              <padding>
+                <Insets top="5" right="5" bottom="5" left="5"/>
+              </padding>
+            </VBox>
+          </ScrollPane>
+          <HBox fx:id = "test" prefHeight = "50" translateY = "400" translateX = "600" spacing = "10">
+            <padding>
+              <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <Button onAction="#openFileExplorer"> Images </Button>
+            <Button> Files </Button>
+            <Button> Voice Recording </Button>
+            <Button> Link </Button>
+          </HBox>
+        </StackPane>
+      </VBox>
+      <HBox spacing="10" alignment="CENTER">
+        <padding>
+          <Insets top="10" right="10" bottom="10" left="10"/>
+        </padding>
+        <Button text="+" onAction="#showButtonPanel"></Button>
+        <Separator orientation="VERTICAL"></Separator>
         <TextArea promptText="Type here..." fx:id="chatField" maxHeight="30" wrapText="true"
-          onKeyPressed="#onEnter" prefWidth = "500"> </TextArea>
+          onKeyPressed="#onEnter" prefWidth="500"></TextArea>
       </HBox>
     </VBox>
 
   </HBox>
 
 </VBox>
+<!--<?xml version="1.0" encoding="UTF-8"?>-->
+
+<!--<?import java.lang.*?>-->
+<!--<?import java.util.*?>-->
+<!--<?import javafx.scene.*?>-->
+<!--<?import javafx.scene.control.*?>-->
+<!--<?import javafx.scene.layout.*?>-->
+
+<!--<?import javafx.scene.text.TextFlow?>-->
+<!--<?import javafx.scene.image.ImageView?>-->
+<!--<?import javafx.scene.image.Image?>-->
+<!--<?import javafx.geometry.Insets?>-->
+<!--<VBox xmlns="http://javafx.com/javafx"-->
+<!--  xmlns:fx="http://javafx.com/fxml"-->
+<!--  fx:controller="client.view.javafx.FXMLController"-->
+<!--  prefHeight="400.0" prefWidth="600.0" fx:id="layout">-->
+
+<!--  &lt;!&ndash;Chat Area&ndash;&gt;-->
+<!--  <HBox minHeight="500">-->
+<!--    <VBox>-->
+<!--      <HBox>-->
+<!--        <ImageView fitWidth = "50" fitHeight="50">-->
+<!--          <image>-->
+<!--            <Image url="@/client/resources/logo/multichat_logo.png"/>-->
+<!--          </image>-->
+<!--        </ImageView>-->
+<!--      </HBox>-->
+<!--      <TabPane prefHeight = "600">-->
+<!--        <padding> <Insets top = "10" right = "10" bottom = "10" left =  "10" /></padding>-->
+<!--        <Tab text = "Users" closable="false">-->
+<!--          <ListView fx:id = "userListView">-->
+<!--          </ListView>-->
+<!--        </Tab>-->
+<!--        <Tab text = "Servers" closable="false">-->
+<!--          <ListView fx:id = "serverListView">-->
+<!--          </ListView>-->
+<!--        </Tab>-->
+<!--      </TabPane>-->
+<!--    </VBox>-->
+
+<!--    <VBox minWidth = "600" alignment="CENTER">-->
+<!--      <ImageView id="boxImage" fitWidth = "600" fitHeight = "100">-->
+<!--        <image>-->
+<!--          <Image url="@/client/resources/logo/multichat_full_logo.png"/>-->
+<!--        </image>-->
+<!--      </ImageView>-->
+<!--      <ScrollPane minHeight = "450" maxHeight = "450" minWidth = "600" fx:id ="scrollPane">-->
+<!--        <VBox fx:id="chatLog" minWidth = "590" spacing = "3">-->
+<!--          <padding> <Insets top = "5" right = "5" bottom = "5" left = "5"/></padding>-->
+<!--        </VBox>-->
+<!--      </ScrollPane>-->
+<!--      <HBox spacing = "10" alignment = "CENTER">-->
+<!--        <padding> <Insets top = "10" right = "10" bottom = "10" left =  "10" /> </padding>-->
+<!--        <Button text = "+"></Button>-->
+<!--        <Separator orientation = "VERTICAL" ></Separator>-->
+<!--        <TextArea promptText="Type here..." fx:id="chatField" maxHeight="30" wrapText="true"-->
+<!--          onKeyPressed="#onEnter" prefWidth = "500"> </TextArea>-->
+<!--      </HBox>-->
+<!--    </VBox>-->
+
+<!--  </HBox>-->
+
+<!--</VBox>-->

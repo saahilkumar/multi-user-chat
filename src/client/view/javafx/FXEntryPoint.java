@@ -7,6 +7,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -20,34 +21,52 @@ import javafx.stage.Stage;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+/**
+ * A JavaFX Application class that provides an entry point in creating the MultiChat JavaFX view. Every instance stores
+ * itself as a static variable so the controller can access this object when Application.launch has started. This class
+ * also stores the controller of the GUI (FXMLController), the window, and the name of the user.
+ */
 public class FXEntryPoint extends Application implements MultiChatView {
-  private FXMLController controller;
-  private Stage window;
-  public static FXEntryPoint currentApp;
-  public static final CountDownLatch initLatch = new CountDownLatch(1);
-  public static CountDownLatch nameLatch = new CountDownLatch(1);
-  private String name;
-  private String prompt;
+
+  //a static variable to access the created anonymous object when launch is called
+  private static FXEntryPoint currentApp;
+
+  private FXMLController controller; //controller class that handles the javafx gui components
+  private Stage window; //primary stage (window) of the javafx gui
+  private String name; //the name of the user of this client
+
+  private static final CountDownLatch waitForInitLatch = new CountDownLatch(1);
+  private static CountDownLatch waitForNameLatch;
+  private String prompt; //prompt for username request dialog windows
+
   private Feature feature;
 
+  /**
+   * Creates an instance of FXEntryPoint. When Application.launch() creates a new instance of this class, set the
+   * created object to the public static variable
+   */
   public FXEntryPoint() {
     currentApp = this;
   }
 
+  /**
+   * Gets the most recent instance of FXEntryPoint. A blocking method that will wait until an instance is called
+   * and initialized.
+   * @return the most recent instance of FXEntryPoint
+   */
   public static FXEntryPoint getCurrentInstance() {
     try {
-      initLatch.await();
+      waitForInitLatch.await(); //ensures a proper instance by waiting until the object has been fully initialized
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
     return currentApp;
   }
 
-
   @Override
   public void giveFeatures(Feature feature) {
-    controller.setFeatures(feature);
     this.feature = feature;
+    controller.setFeatures(feature);
   }
 
   @Override
@@ -56,6 +75,7 @@ public class FXEntryPoint extends Application implements MultiChatView {
       window.show();
       window.setTitle("MultiChat - " + name);
     });
+
   }
 
   @Override
@@ -70,14 +90,15 @@ public class FXEntryPoint extends Application implements MultiChatView {
 
   @Override
   public String getName(String prompt) {
-//    return FXGetNameDialog.display(prompt);
-    nameLatch = new CountDownLatch(1);
     this.prompt = prompt;
-    Platform.runLater(new RunDialog());
+    Platform.runLater(() -> this.displayNameDialog(prompt)); //creates a pop-up dialog that requests a username
+
+    //blocks this method, until the pop-up dialog supplies a legitimate name
+    waitForNameLatch = new CountDownLatch(1);
     try {
-      nameLatch.await();
-    } catch(Exception e) {
-      System.out.println(e.getMessage());
+      waitForNameLatch.await();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
     }
     return name;
   }
@@ -100,87 +121,279 @@ public class FXEntryPoint extends Application implements MultiChatView {
   @Override
   public void start(Stage stage) throws Exception {
     window = stage;
+
+    //get a FXML loader object based on the fxml file given
     FXMLLoader loader = new FXMLLoader(getClass().getResource("MultiChatFXML.fxml"));
-    VBox flowPane = loader.load();
-    // Get the Controller from the FXMLLoader
+    Parent pane = loader.load();
+
+    // get the controller (FXMLController) from the FXMLLoader that handles gui logic and components
     controller = loader.getController();
-    Scene scene = new Scene(flowPane, 800, 630);
-    controller.setScene(scene);
+
+    //initialize the primary scene from the fxml file
+    Scene scene = new Scene(pane);
     window.setScene(scene);
-    window.setTitle("MultiChat");
-    window.setOnCloseRequest(e -> feature.sendTextOut("/quit"));
+    window.sizeToScene();
+    controller.setScene(scene);
+
+    //adds the icons to the taskbar and window frame
+    window.getIcons().add(new Image(this.getClass().getResourceAsStream(
+        "/client/resources/logo/multichat_logo.png")));
+
     window.setResizable(false);
-    window.getIcons().add(new Image(this.getClass().getResourceAsStream("/client/resources/logo/multichat_logo.png")));
-    initLatch.countDown();
+    window.setOnCloseRequest(e -> {
+      this.feature.sendTextOut("/quit");
+    });
+
+    //allows this instance to be accessed by the latch once this method finishes
+    waitForInitLatch.countDown();
   }
 
-  private class RunDialog implements Runnable {
+  //a method that creates a dialog that requests the user for an username
+  private void displayNameDialog(String message) {
+    Stage dialogWindow = new Stage();
+    dialogWindow.setOnCloseRequest(e -> {
+      System.exit(4);
+    });
+    dialogWindow.setTitle("MultiChat - Name Selection");
+    dialogWindow.initModality(Modality.APPLICATION_MODAL);
 
-    @Override
-    public void run() {
-      new FXGetNameDialog().display(prompt);
-    }
+    VBox root = new VBox();
+    root.setAlignment(Pos.CENTER);
+    root.setSpacing(10);
+
+    //inside root
+    ImageView banner = new ImageView();
+    Image fullLogo = new Image(getClass().getResourceAsStream(
+        "/client/resources/logo/multichat_full_logo.png"));
+    banner.setImage(fullLogo);
+
+    //inside root
+    VBox inputPanel = new VBox();
+    inputPanel.setPadding(new Insets(10,30,10,30));
+    inputPanel.setAlignment(Pos.CENTER);
+    inputPanel.setSpacing(10);
+
+    //inside inputPanel
+    Label prompt = new Label(message);
+    TextField field = new TextField();
+    field.setPromptText("Enter your name...");
+
+    //inside input Panel
+    HBox buttonPanel = new HBox();
+    buttonPanel.setAlignment(Pos.CENTER);
+    buttonPanel.setSpacing(35);
+
+    //inside button Panel
+    Button submitButton = new Button("Submit");
+    Button cancelButton = new Button("Cancel");
+    submitButton.setOnAction((e) -> {
+      name = field.getText();
+      waitForNameLatch.countDown();
+      dialogWindow.close();
+    });
+    cancelButton.setOnAction((e) -> System.exit(3));
+
+
+    buttonPanel.getChildren().addAll(cancelButton, submitButton);
+    inputPanel.getChildren().addAll(prompt, field, buttonPanel);
+    root.getChildren().addAll(banner, inputPanel);
+
+    dialogWindow.setScene(new Scene(root));
+    dialogWindow.sizeToScene();
+    dialogWindow.getIcons().add(new Image(this.getClass().getResourceAsStream(
+        "/client/resources/logo/multichat_logo.png")));
+    dialogWindow.setResizable(false);
+    banner.requestFocus();
+    dialogWindow.showAndWait();
   }
 
-  private class FXGetNameDialog {
-
-    private String answer;
-
-    private void display(String msg) {
-      Stage nameWindow =  new Stage();
-      nameWindow.setTitle("MultiChat - Name Selection");
-      nameWindow.initModality(Modality.APPLICATION_MODAL);
-      nameWindow.setOnCloseRequest(e -> System.exit(3));
-
-      ImageView banner = new ImageView();
-      Image fullLogo = new Image(getClass().getResourceAsStream("/client/resources/logo/multichat_full_logo.png"));
-      banner.setImage(fullLogo);
-      banner.minWidth(300);
-
-      Label label = new Label(msg);
-
-      TextField field = new TextField();
-      field.setPromptText("name...");
-      field.setMinWidth(250);
-
-      HBox buttonPanel = new HBox();
-      Button submitButton = new Button("Submit");
-      submitButton.setOnAction(e -> {
-        name = field.getText();
-        nameLatch.countDown();
-        nameWindow.close();
-      });
-
-      Button cancelButton = new Button("Cancel");
-      cancelButton.setOnAction(e -> {
-        System.exit(3);
-      });
-      buttonPanel.getChildren().addAll(cancelButton, submitButton);
-      buttonPanel.setAlignment(Pos.CENTER);
-      buttonPanel.setSpacing(35);
-
-
-      VBox inputPanel = new VBox();
-      inputPanel.setAlignment(Pos.CENTER);
-      inputPanel.setSpacing(10);
-      inputPanel.setPadding(new Insets(10, 30, 10, 30));
-      inputPanel.getChildren().addAll(label, field, buttonPanel);
-
-      VBox layout = new VBox();
-      layout.setAlignment(Pos.CENTER);
-      layout.getChildren().addAll(banner, inputPanel);
-
-      Scene scene = new Scene(layout);
-      nameWindow.setScene(scene);
-      nameWindow.sizeToScene();
-      nameWindow.setResizable(false);
-      nameWindow.getIcons().add(new Image(this.getClass().getResourceAsStream("/client/resources/logo/multichat_logo.png")));
-
-      banner.requestFocus();
-      nameWindow.showAndWait();
-    }
-
-  }
 
 
 }
+
+//package client.view.javafx;
+//
+//import client.controller.Feature;
+//import client.view.MultiChatView;
+//import javafx.application.Application;
+//import javafx.application.Platform;
+//import javafx.fxml.FXMLLoader;
+//import javafx.geometry.Insets;
+//import javafx.geometry.Pos;
+//import javafx.scene.Scene;
+//import javafx.scene.control.Button;
+//import javafx.scene.control.Label;
+//import javafx.scene.control.TextField;
+//import javafx.scene.image.Image;
+//import javafx.scene.image.ImageView;
+//import javafx.scene.layout.HBox;
+//import javafx.scene.layout.VBox;
+//import javafx.stage.Modality;
+//import javafx.stage.Stage;
+//import java.util.List;
+//import java.util.concurrent.CountDownLatch;
+//
+//public class FXEntryPoint extends Application implements MultiChatView {
+//  private FXMLController controller;
+//  private Stage window;
+//  public static FXEntryPoint currentApp;
+//  public static final CountDownLatch initLatch = new CountDownLatch(1);
+//  public static CountDownLatch nameLatch = new CountDownLatch(1);
+//  private String name;
+//  private String prompt;
+//  private Feature feature;
+//
+//  public FXEntryPoint() {
+//    currentApp = this;
+//  }
+//
+//  public static FXEntryPoint getCurrentInstance() {
+//    try {
+//      initLatch.await();
+//    } catch (InterruptedException e) {
+//      e.printStackTrace();
+//    }
+//    return currentApp;
+//  }
+//
+//
+//  @Override
+//  public void giveFeatures(Feature feature) {
+//    controller.setFeatures(feature);
+//    this.feature = feature;
+//  }
+//
+//  @Override
+//  public void display() {
+//    Platform.runLater(() -> {
+//      window.show();
+//      window.setTitle("MultiChat - " + name);
+//    });
+//  }
+//
+//  @Override
+//  public void appendChatLog(String s, String color, boolean hasDate) {
+//    controller.appendChatLog(s, color, hasDate);
+//  }
+//
+//  @Override
+//  public void setTextFieldEditable(boolean b) {
+//    controller.setTextFieldEditable(b);
+//  }
+//
+//  @Override
+//  public String getName(String prompt) {
+////    return FXGetNameDialog.display(prompt);
+//    nameLatch = new CountDownLatch(1);
+//    this.prompt = prompt;
+//    Platform.runLater(new RunDialog());
+//    try {
+//      nameLatch.await();
+//    } catch(Exception e) {
+//      System.out.println(e.getMessage());
+//    }
+//    return name;
+//  }
+//
+//  @Override
+//  public void setActiveUsers(List<String> activeUsers) {
+//    controller.setActiveUsers(activeUsers);
+//  }
+//
+//  @Override
+//  public void setActiveServers(List<String> activeServers) {
+//    controller.setActiveServers(activeServers);
+//  }
+//
+//  @Override
+//  public void dispose() {
+//    Platform.runLater(() -> window.close());
+//  }
+//
+//  @Override
+//  public void start(Stage stage) throws Exception {
+//    window = stage;
+//    FXMLLoader loader = new FXMLLoader(getClass().getResource("MultiChatFXML.fxml"));
+//    VBox flowPane = loader.load();
+//    // Get the Controller from the FXMLLoader
+//    controller = loader.getController();
+//    Scene scene = new Scene(flowPane, 800, 630);
+//    controller.setScene(scene);
+//    window.setScene(scene);
+//    window.setTitle("MultiChat");
+//    window.setOnCloseRequest(e -> feature.sendTextOut("/quit"));
+//    window.setResizable(false);
+//    window.getIcons().add(new Image(this.getClass().getResourceAsStream("/client/resources/logo/multichat_logo.png")));
+//    initLatch.countDown();
+//  }
+//
+//  private class RunDialog implements Runnable {
+//
+//    @Override
+//    public void run() {
+//      new FXGetNameDialog().display(prompt);
+//    }
+//  }
+//
+//  private class FXGetNameDialog {
+//
+//    private String answer;
+//
+//    private void display(String msg) {
+//      Stage nameWindow =  new Stage();
+//      nameWindow.setTitle("MultiChat - Name Selection");
+//      nameWindow.initModality(Modality.APPLICATION_MODAL);
+//      nameWindow.setOnCloseRequest(e -> System.exit(3));
+//
+//      ImageView banner = new ImageView();
+//      Image fullLogo = new Image(getClass().getResourceAsStream("/client/resources/logo/multichat_full_logo.png"));
+//      banner.setImage(fullLogo);
+//      banner.minWidth(300);
+//
+//      Label label = new Label(msg);
+//
+//      TextField field = new TextField();
+//      field.setPromptText("name...");
+//      field.setMinWidth(250);
+//
+//      HBox buttonPanel = new HBox();
+//      Button submitButton = new Button("Submit");
+//      submitButton.setOnAction(e -> {
+//        name = field.getText();
+//        nameLatch.countDown();
+//        nameWindow.close();
+//      });
+//
+//      Button cancelButton = new Button("Cancel");
+//      cancelButton.setOnAction(e -> {
+//        System.exit(3);
+//      });
+//      buttonPanel.getChildren().addAll(cancelButton, submitButton);
+//      buttonPanel.setAlignment(Pos.CENTER);
+//      buttonPanel.setSpacing(35);
+//
+//
+//      VBox inputPanel = new VBox();
+//      inputPanel.setAlignment(Pos.CENTER);
+//      inputPanel.setSpacing(10);
+//      inputPanel.setPadding(new Insets(10, 30, 10, 30));
+//      inputPanel.getChildren().addAll(label, field, buttonPanel);
+//
+//      VBox layout = new VBox();
+//      layout.setAlignment(Pos.CENTER);
+//      layout.getChildren().addAll(banner, inputPanel);
+//
+//      Scene scene = new Scene(layout);
+//      nameWindow.setScene(scene);
+//      nameWindow.sizeToScene();
+//      nameWindow.setResizable(false);
+//      nameWindow.getIcons().add(new Image(this.getClass().getResourceAsStream("/client/resources/logo/multichat_logo.png")));
+//
+//      banner.requestFocus();
+//      nameWindow.showAndWait();
+//    }
+//
+//  }
+//
+//
+//}
