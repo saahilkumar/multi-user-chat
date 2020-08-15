@@ -240,8 +240,8 @@ public class MultiChatServer {
         } else if(input.toLowerCase().startsWith("/votekick ")) {
           printVotekickMessage(input.substring(10));
         } else if(input.toLowerCase().startsWith("/whisper ")) {
-          String receiver = input.substring(9, input.indexOf("/", 1));
-          String msg = input.substring(input.indexOf("/", 1) + 1);
+          String receiver = input.substring(9, input.indexOf(":"));
+          String msg = input.substring(input.indexOf(":") + 1);
           printWhisper(receiver, msg);
         } else {
           for (PrintWriter writer : outputWriters) {
