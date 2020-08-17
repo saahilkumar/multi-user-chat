@@ -77,4 +77,6 @@ public interface MultiChatView {
   void dispose();
 
   void setActiveServers(List<String> servers);
+
+  void displayError(boolean remainRunningWhenClosed, String errorMessage);
 }

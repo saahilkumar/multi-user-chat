@@ -64,6 +64,10 @@ public class MultiChatControllerImpl implements MultiChatController, Feature {
         view.appendChatLog(line.substring(19), "red", false, "SUCCESSFULVOTEKICK");
       } else if(line.startsWith("WHISPER ")) {
         view.appendChatLog(line.substring(8), "white", true, "WHISPER");
+      } else if(line.startsWith("FAILEDWHISPER ")) {
+        view.appendChatLog(line.substring(14), "red", false, "FAILEDWHISPER");
+      } else if(line.startsWith("PRIVATEMESSAGE ")) {
+        view.appendChatLog(line.substring(15), "black", true, "PRIVATEMESSAGE");
       } else if (line.startsWith("REQUESTEDNEWROOM ")) {
         try {
           MultiChatModel newModel = model.switchPorts(line.substring(17));

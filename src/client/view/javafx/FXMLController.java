@@ -2,14 +2,20 @@ package client.view.javafx;
 
 import client.controller.Feature;
 import client.view.MultiChatView;
+import java.awt.print.PrinterException;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -32,6 +38,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.File;
@@ -42,6 +50,7 @@ import java.util.Map;
 public class FXMLController {
   private Feature features;
   private Scene scene;
+  private Set<PrivateMessagingController> privateMessagingWindows = new HashSet<>();
 
   @FXML
   private TextArea chatField;
@@ -73,7 +82,7 @@ public class FXMLController {
     this.features = features;
   }
 
-  public void setScene(Scene scene) {
+  public void initialize(Scene scene) {
     this.scene = scene;
     scrollPane.vvalueProperty().bind(chatLog.heightProperty());
     this.serverListView.setItems(serverList);
@@ -83,7 +92,8 @@ public class FXMLController {
     initializeEmotePanels(MultiChatView.TWITCH_EMOTES,"/client/resources/images/twitch/", twitchEmotePanel);
   }
 
-  public void onEnter(KeyEvent ke) {
+  @FXML
+  private void onEnter(KeyEvent ke) {
     String text = chatField.getText();
     if (ke.getCode() == KeyCode.ENTER) {
       if (text.isBlank()) {
@@ -101,11 +111,45 @@ public class FXMLController {
   }
 
   public void appendChatLog(String s, String color, boolean hasDate, String protocol) {
-    if (hasDate) {
-      appendMessage(formatDate(s), getColor(color), hasDate, protocol);
+    if (protocol.equals("PRIVATEMESSAGE")) {
+      String[] components = s.substring(s.indexOf("]") + 2).split(": ");
+      String date = s.substring(0, s.indexOf("]") + 1);
+      String sender = components[0];
+      String receiver = components[1];
+      String messageAndReceiver = s.substring(s.indexOf(": ") + 2);
+      String message = messageAndReceiver.substring(messageAndReceiver.indexOf(": ") + 2);
+      if (sender.equals(features.getClientUsername())) { //if user sent this message
+        for (PrivateMessagingController con : privateMessagingWindows) {
+          if(con.getReceiver().equals(receiver)) {
+            con.appendChatLog(date + " " + sender + ": " + message, color, hasDate, protocol);
+            return;
+          }
+        }
+      } else { //incoming message
+        for (PrivateMessagingController con : privateMessagingWindows) {
+          if(con.getReceiver().equals(sender)) {
+            con.appendChatLog( date + " " + sender + ": " + message, color, hasDate, protocol);
+            return;
+          }
+        }
+        Platform.runLater(() ->{
+          openPrivateMessagingWindow(sender);
+          for (PrivateMessagingController con : privateMessagingWindows) {
+            if(con.getReceiver().equals(sender)) {
+              con.appendChatLog(date + " " + sender + ": " + message, color, hasDate, protocol);
+              return;
+            }
+          }
+        });
+      }
     } else {
-      appendMessage(s, getColor(color), hasDate, protocol);
+      if (hasDate) {
+        appendMessage(formatDate(s), getColor(color), hasDate, protocol);
+      } else {
+        appendMessage(s, getColor(color), hasDate, protocol);
+      }
     }
+
   }
 
   private void appendMessage(String msg, Color c, boolean hasDate, String protocol) {
@@ -292,6 +336,16 @@ public class FXMLController {
     });
   }
 
+  @FXML
+  private void openSettingsPanel() {
+
+  }
+
+  @FXML
+  private void openNewChatWindow() {
+    new NewChatWindow();
+  }
+
   private void mapNameToColor(List<String> listOfNames) {
     for(String name : listOfNames) {
       if(!nameColors.containsKey(name)) {
@@ -347,6 +401,7 @@ public class FXMLController {
           userIcon.setFill(nameColors.get(item));
 
           MenuItem privateMessage = new MenuItem("Private Message");
+          privateMessage.setOnAction(e -> openPrivateMessagingWindow(item));
 
           MenuItem kick = new MenuItem("Kick");
           kick.setOnAction(e -> features.sendTextOut("/votekick " + item));
@@ -361,7 +416,7 @@ public class FXMLController {
           });
 
 
-          button = new MenuButton(item, userIcon, privateMessage, whisper, kick);
+          button = new MenuButton(item, userIcon, privateMessage, whisper, new SeparatorMenuItem(), kick);
         } else {
           int roomNum = Integer.parseInt(item.split(" ")[1]);
           userIcon.setFill(Color.GREEN);
@@ -434,6 +489,99 @@ public class FXMLController {
       }
     }
 
+  }
+
+  private void openPrivateMessagingWindow(String receiver) {
+    if (features.getClientUsername().equals(receiver)) {
+      appendChatLog("You cannot privately message yourself.", "red", false, "MESSAGEHELP");
+      return;
+    }
+    for (PrivateMessagingController con : privateMessagingWindows) {
+      if (con.getReceiver().equals(receiver)) {
+        con.getWindow().toFront();
+        return;
+      }
+    }
+    try {
+      FXMLLoader loader = new FXMLLoader(getClass().getResource("PrivateMessaging.fxml"));
+      Parent pane = loader.load();
+      Stage window = new Stage();
+      window.setScene(new Scene(pane));
+      PrivateMessagingController controller = loader.getController();
+      controller.initialize(receiver, features.getClientUsername(), features, window);
+      privateMessagingWindows.add(controller);
+      controller.appendChatLog("You are now privately messaging " +
+          receiver + ".", "blue", false, "MESSAGEWELCOME");
+      window.sizeToScene();
+      window.setResizable(false);
+      window.setOnCloseRequest(e -> {
+        privateMessagingWindows.remove(controller);
+      });
+      window.setTitle("Private Messaging - " + receiver);
+      window.show();
+    } catch (IOException ioe) {
+      displayError(true,"Something went wrong: Unable to private message.");
+    }
+  }
+
+  public void displayError(boolean remainRunningWhenClosed, String errorMessage) {
+    Platform.runLater(() -> {
+      Alert alert = new Alert(Alert.AlertType.ERROR, errorMessage);
+      if (!remainRunningWhenClosed) {
+        alert.setOnCloseRequest(e -> System.exit(1));
+      }
+    });
+  }
+
+//
+//  private void sendPrivateMessage() {
+//
+//  }
+
+//  private static class PrivateMessageWindow {
+//    private static void openPrivateMessageWindow(String receiver) {
+//      FXMLLoader loader = new FXMLLoader();
+//      VBox layout = new VBox();
+//      Scene scene = new Scene(layout);
+//      Stage stage = new Stage();
+//      stage.setScene(scene);
+//      stage.sizeToScene();
+//      stage.setTitle("Private Message - " + receiver);
+//      stage.setResizable(false);
+//      stage.show();
+//    }
+//  }
+
+  private class NewChatWindow {
+    private NewChatWindow() {
+      ObservableList<String> otherUsers = FXCollections.observableArrayList();
+      for (String user : userList) {
+        if (!user.equals(features.getClientUsername())) {
+          otherUsers.add(user);
+        }
+      }
+
+      VBox layout = new VBox();
+      ImageView banner = new ImageView(new Image(getClass().getResourceAsStream(
+          "/client/resources/logo/multichat_full_logo.png")));
+      VBox textAndList = new VBox();
+      textAndList.setPadding(new Insets(5, 5, 5, 5));
+      textAndList.setSpacing(5);
+      Text header = new Text("Please select a user to start chatting with.");
+      header.setFont(new Font("Verdana", 12));
+      ListView<String> displayNames = new ListView<>();
+      displayNames.setItems(otherUsers);
+      textAndList.getChildren().addAll(header, displayNames);
+      layout.getChildren().addAll(banner, textAndList);
+
+      Stage newChatWindow = new Stage();
+      newChatWindow.initModality(Modality.APPLICATION_MODAL);
+      newChatWindow.setScene(new Scene(layout));
+      newChatWindow.setTitle("Start a new chat");
+      newChatWindow.setResizable(false);
+      newChatWindow.sizeToScene();
+      newChatWindow.showAndWait();
+    }
   }
 
 //    public void setDarkMode() {

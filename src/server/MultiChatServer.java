@@ -135,6 +135,8 @@ public class MultiChatServer {
           System.out.println(serverList);
           updateServerList();
         }
+        socketToMasterServer.close();
+        System.exit(3);
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -243,6 +245,14 @@ public class MultiChatServer {
           String receiver = input.substring(9, input.indexOf(":"));
           String msg = input.substring(input.indexOf(":") + 1);
           printWhisper(receiver, msg);
+        } else if(input.toLowerCase().startsWith("/privatemsg ")) {
+          String[] components = input.split(": ");
+          String sender = components[0].substring(12);
+          String receiver = components[1];
+          String inputWithoutDate = input.substring(12);
+          String messageAndReceiver = inputWithoutDate.substring(inputWithoutDate.indexOf(": ") + 2);
+          String message = messageAndReceiver.substring(messageAndReceiver.indexOf(": ") + 2);
+          printPrivMsg(sender, receiver, message);
         } else {
           for (PrintWriter writer : outputWriters) {
             writer.println("MESSAGE " + "[" + new Date().toString() + "] " + name + ": " +input);
@@ -381,8 +391,19 @@ public class MultiChatServer {
     }
 
     private void printWhisper(String receiver, String msg) {
+      if(!users.containsKey(receiver)) {
+        out.println("FAILEDWHISPER There is no user named " + receiver + " to whisper to!");
+        return;
+      }
       users.get(receiver).out.println("WHISPER " + "[" + new Date().toString() + "] " + name + ": " + msg);
       out.println("WHISPER " + "[" + new Date().toString() + "] " + name + ": " + msg);
+    }
+
+    private void printPrivMsg(String sender, String receiver, String msg) {
+      out.println("PRIVATEMESSAGE " + "[" + new Date().toString() + "] " +
+          sender + ": " + receiver + ": " + msg);
+      users.get(receiver).out.println("PRIVATEMESSAGE " + "[" + new Date().toString() + "] " +
+          sender + ": " + receiver + ": " + msg);
     }
 
     private void updateActiveUsers() {

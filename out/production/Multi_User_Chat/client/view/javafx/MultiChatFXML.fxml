@@ -19,13 +19,39 @@
 
   <HBox minHeight="500">
     <VBox minWidth="200">
-      <HBox>
-        <ImageView fitWidth="50" fitHeight="50">
+      <StackPane alignment="CENTER_RIGHT">
+        <ImageView fitWidth="200" fitHeight="50" >
           <image>
-            <Image url="@/client/resources/logo/multichat_logo.png"/>
+            <Image url="@/client/resources/logo/multichat_overhead.png"/>
           </image>
         </ImageView>
-      </HBox>
+        <Group>
+          <HBox spacing = "10">
+            <padding><Insets top = "10" right = "10" bottom = "10" left = "10"></Insets></padding>
+            <Button focusTraversable="false" onAction = "#openNewChatWindow">
+              <style>
+                -fx-background-radius: 10em;
+                -fx-focus-color: transparent;
+                -fx-min-width: 30px;
+                -fx-min-height: 30px;
+                -fx-max-width: 30px;
+                -fx-max-height: 30px;
+                -fx-background-size: 100% 100%;
+              </style>
+            </Button>
+            <Button focusTraversable="false" onAction = "#openSettingsPanel">
+              <style>
+                -fx-background-radius: 10em;
+                -fx-focus-color: transparent;
+                -fx-min-width: 30px;
+                -fx-min-height: 30px;
+                -fx-max-width: 30px;
+                -fx-max-height: 30px;
+              </style>
+            </Button>
+          </HBox>
+        </Group>
+      </StackPane>
       <TabPane>
         <padding>
           <Insets top="10" right="10" bottom="10" left="10"/>
@@ -46,7 +72,7 @@
       <VBox maxHeight = "550">
         <ImageView id="boxImage" fitWidth="600" fitHeight="100">
           <image>
-            <Image url="@/client/resources/logo/multichat_full_logo.png"/>
+            <Image url="@/client/resources/logo/multichat_banner.png"/>
           </image>
         </ImageView>
         <StackPane maxHeight = "450">
@@ -117,11 +143,11 @@
           <Insets top="10" right="10" bottom="10" left="10"/>
         </padding>
         <style>
-          -fx-background-color: rgba(0, 100, 100, 1)
+          -fx-background-color: rgba(0, 162, 232, 1)
         </style>
         <Button text = "+" onAction="#showButtonPanel">
           <style>
-            -fx-background-radius: 5em;
+            -fx-background-radius: 1em;
             -fx-font-size:15;
           </style>
         </Button>
@@ -142,6 +168,7 @@
   </HBox>
 
 </VBox>
+
 <!--<?xml version="1.0" encoding="UTF-8"?>-->
 
 <!--<?import java.lang.*?>-->
@@ -154,6 +181,8 @@
 <!--<?import javafx.scene.image.ImageView?>-->
 <!--<?import javafx.scene.image.Image?>-->
 <!--<?import javafx.geometry.Insets?>-->
+<!--<?import javafx.scene.effect.BoxBlur?>-->
+<!--<?import javafx.scene.text.Text?>-->
 <!--<VBox xmlns="http://javafx.com/javafx"-->
 <!--  xmlns:fx="http://javafx.com/fxml"-->
 <!--  fx:controller="client.view.javafx.FXMLController"-->
@@ -188,7 +217,7 @@
 <!--      <VBox maxHeight = "550">-->
 <!--        <ImageView id="boxImage" fitWidth="600" fitHeight="100">-->
 <!--          <image>-->
-<!--            <Image url="@/client/resources/logo/multichat_full_logo.png"/>-->
+<!--            <Image url="@/client/resources/logo/multichat_banner.png"/>-->
 <!--          </image>-->
 <!--        </ImageView>-->
 <!--        <StackPane maxHeight = "450">-->
@@ -199,15 +228,59 @@
 <!--              </padding>-->
 <!--            </VBox>-->
 <!--          </ScrollPane>-->
-<!--          <HBox fx:id = "fileButtons" prefHeight = "50" translateY = "450" spacing = "10">-->
-<!--            <padding>-->
-<!--              <Insets top="10" right="10" bottom="10" left="10"/>-->
-<!--            </padding>-->
-<!--            <Button onAction="#openFileExplorer"> Images </Button>-->
-<!--            <Button> Files </Button>-->
-<!--            <Button> Voice Recording </Button>-->
-<!--            <Button> Link </Button>-->
-<!--          </HBox>-->
+<!--          <VBox fx:id = "fileButtons"  translateY = "450">-->
+<!--            <style>-->
+<!--              -fx-background-color: rgba(255, 255, 255, 0.5);-->
+<!--            </style>-->
+<!--            <HBox spacing = "10" prefHeight = "50">-->
+<!--              <padding>-->
+<!--                <Insets top="10" right="10" bottom="10" left="10"/>-->
+<!--              </padding>-->
+<!--              <Button onAction="#openFileExplorer"> Upload Images </Button>-->
+<!--              <Button> Upload Files </Button>-->
+<!--              <Button> Voice Recording </Button>-->
+<!--              <Button onAction = "#showEmotePanel"> Emotes </Button>-->
+<!--            </HBox>-->
+<!--            <ScrollPane prefHeight = "100"  prefWidth = "600" >-->
+<!--              <padding>-->
+<!--                <Insets top = "5" right = "5" bottom = "5" left = "5"></Insets>-->
+<!--              </padding>-->
+<!--              <VBox>-->
+<!--                <padding>-->
+<!--                  <Insets top = "2" right = "2" bottom = "2" left = "2"></Insets>-->
+<!--                </padding>-->
+<!--                <style>-->
+<!--                  -fx-border-color: blue;-->
+<!--                  -fx-border-width: 1;-->
+<!--                  -fx-border-insets: 3;-->
+<!--                </style>-->
+<!--                <Text>-->
+<!--                  <style>-->
+<!--                    -fx-font: 15px Verdana;-->
+<!--                  </style>-->
+<!--                  Standard-->
+<!--                </Text>-->
+<!--                <GridPane fx:id = "standardEmotePanel" vgap = "5" hgap = "5">-->
+<!--                  <padding>-->
+<!--                    <Insets top = "2" right = "2" bottom = "2" left = "2"></Insets>-->
+<!--                  </padding>-->
+<!--                </GridPane>-->
+<!--                <Separator></Separator>-->
+<!--                <Text>-->
+<!--                  <style>-->
+<!--                    -fx-font: 15px Verdana;-->
+<!--                  </style>-->
+<!--                  Twitch-->
+<!--                </Text>-->
+<!--                <GridPane fx:id = "twitchEmotePanel" vgap = "5" hgap = "5">-->
+<!--                  <padding>-->
+<!--                    <Insets top = "2" right = "2" bottom = "2" left = "2"></Insets>-->
+<!--                  </padding>-->
+<!--                </GridPane>-->
+<!--              </VBox>-->
+
+<!--            </ScrollPane>-->
+<!--          </VBox>-->
 <!--        </StackPane>-->
 <!--      </VBox>-->
 <!--      <HBox spacing="10" alignment="CENTER">-->
@@ -215,21 +288,24 @@
 <!--          <Insets top="10" right="10" bottom="10" left="10"/>-->
 <!--        </padding>-->
 <!--        <style>-->
-<!--          -fx-background-color: rgba(0, 175, 255, 1)-->
+<!--          -fx-background-color: rgba(0, 162, 232, 1)-->
 <!--        </style>-->
-<!--        <Button text="+" onAction="#showButtonPanel">-->
+<!--        <Button text = "+" onAction="#showButtonPanel">-->
 <!--          <style>-->
 <!--            -fx-background-radius: 5em;-->
-<!--            -fx-font-size: 15px;-->
+<!--            -fx-font-size:15;-->
 <!--          </style>-->
 <!--        </Button>-->
 <!--        <Separator orientation="VERTICAL"></Separator>-->
-<!--        <TextArea promptText="Type here..." fx:id="chatField" maxHeight="30" wrapText="true"-->
+<!--        <TextArea promptText="Type here..." fx:id="chatField" maxHeight="10" wrapText="true"-->
 <!--          onKeyPressed="#onEnter" prefWidth="500">-->
-<!--&lt;!&ndash;          <style>&ndash;&gt;-->
-<!--&lt;!&ndash;            -fx-border-radius: 10 10 0 0;&ndash;&gt;-->
-<!--&lt;!&ndash;            -fx-background-radius: 10 10 0 0;&ndash;&gt;-->
-<!--&lt;!&ndash;          </style>&ndash;&gt;-->
+<!--          <style>-->
+<!--            -fx-focus-color: transparent;-->
+<!--            -fx-background-color: rgba(255, 255, 255, 1);-->
+<!--            -fx-padding: 0.333333em 1em 0.333333em 1em;-->
+<!--            -fx-border-radius: 20;-->
+<!--            -fx-background-radius: 20;-->
+<!--          </style>-->
 <!--        </TextArea>-->
 <!--      </HBox>-->
 <!--    </VBox>-->

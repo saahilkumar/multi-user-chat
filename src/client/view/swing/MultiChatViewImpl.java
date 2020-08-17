@@ -453,4 +453,10 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
   private void createHelpDialog() {
     new HelpDialog();
   }
+
+  @Override
+  public void displayError(boolean remainRunningWhenClosed, String errorMessage) {
+    return;
+  }
+
 }

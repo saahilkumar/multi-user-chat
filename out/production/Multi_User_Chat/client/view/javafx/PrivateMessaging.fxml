@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
+<VBox xmlns="http://javafx.com/javafx"
+  xmlns:fx="http://javafx.com/fxml"
+  fx:controller="client.view.javafx.PrivateMessagingController"
+  prefHeight="400.0" prefWidth="600.0">
+
+  <VBox alignment="CENTER">
+    <VBox maxHeight = "550">
+      <ImageView id="boxImage" fitWidth="600" fitHeight="100">
+        <image>
+          <Image url="@/client/resources/logo/multichat_banner.png"/>
+        </image>
+      </ImageView>
+      <StackPane maxHeight = "450">
+        <ScrollPane minHeight="450" maxHeight="450" minWidth="600" fx:id="scrollPane">
+          <VBox fx:id="chatLog" minWidth="590" spacing="3">
+            <padding>
+              <Insets top="8" right="8" bottom="8" left="8"/>
+            </padding>
+          </VBox>
+        </ScrollPane>
+        <VBox fx:id = "fileButtons"  translateY = "450">
+          <style>
+            -fx-background-color: rgba(255, 255, 255, 0.5);
+          </style>
+          <HBox spacing = "10" prefHeight = "50">
+            <padding>
+              <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <Button onAction="#openFileExplorer"> Upload Images </Button>
+            <Button> Upload Files </Button>
+            <Button> Voice Recording </Button>
+            <Button onAction = "#showEmotePanel"> Emotes </Button>
+          </HBox>
+          <ScrollPane prefHeight = "100"  prefWidth = "600" >
+            <padding>
+              <Insets top = "5" right = "5" bottom = "5" left = "5"></Insets>
+            </padding>
+            <VBox>
+              <padding>
+                <Insets top = "2" right = "2" bottom = "2" left = "2"></Insets>
+              </padding>
+              <style>
+                -fx-border-color: blue;
+                -fx-border-width: 1;
+                -fx-border-insets: 3;
+              </style>
+              <Text>
+                <style>
+                  -fx-font: 15px Verdana;
+                </style>
+                Standard
+              </Text>
+              <GridPane fx:id = "standardEmotePanel" vgap = "5" hgap = "5">
+                <padding>
+                  <Insets top = "2" right = "2" bottom = "2" left = "2"></Insets>
+                </padding>
+              </GridPane>
+              <Separator></Separator>
+              <Text>
+                <style>
+                  -fx-font: 15px Verdana;
+                </style>
+                Twitch
+              </Text>
+              <GridPane fx:id = "twitchEmotePanel" vgap = "5" hgap = "5">
+                <padding>
+                  <Insets top = "2" right = "2" bottom = "2" left = "2"></Insets>
+                </padding>
+              </GridPane>
+            </VBox>
+
+          </ScrollPane>
+        </VBox>
+      </StackPane>
+    </VBox>
+    <HBox spacing="10" alignment="CENTER">
+      <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+      </padding>
+      <style>
+        -fx-background-color: rgba(0, 162, 232, 1)
+      </style>
+      <Button text = "+" onAction="#showButtonPanel">
+        <style>
+          -fx-background-radius: 1em;
+          -fx-font-size:15;
+        </style>
+      </Button>
+      <Separator orientation="VERTICAL"></Separator>
+      <TextArea promptText="Type here..." fx:id="chatField" maxHeight="10" wrapText="true"
+        onKeyPressed="#onEnter" prefWidth="500">
+        <style>
+          -fx-focus-color: transparent;
+          -fx-background-color: rgba(255, 255, 255, 1);
+          -fx-padding: 0.333333em 1em 0.333333em 1em;
+          -fx-border-radius: 20;
+          -fx-background-radius: 20;
+        </style>
+      </TextArea>
+    </HBox>
+  </VBox>
+</VBox>
+<!--<?xml version="1.0" encoding="UTF-8"?>-->
+
+<!--<?import java.lang.*?>-->
+<!--<?import java.util.*?>-->
+<!--<?import javafx.scene.*?>-->
+<!--<?import javafx.scene.control.*?>-->
+<!--<?import javafx.scene.layout.*?>-->
+
+<!--<?import javafx.scene.image.ImageView?>-->
+<!--<?import javafx.scene.image.Image?>-->
+<!--<?import javafx.geometry.Insets?>-->
+<!--<?import javafx.scene.text.Text?>-->
+<!--<VBox xmlns="http://javafx.com/javafx"-->
+<!--  xmlns:fx="http://javafx.com/fxml"-->
+<!--  fx:controller="client.view.javafx.PrivateMessagingController"-->
+<!--  prefHeight="400.0" prefWidth="600.0">-->
+
+<!--  <VBox alignment="CENTER">-->
+<!--    <VBox maxHeight = "550">-->
+<!--      <ImageView id="boxImage" fitWidth="600" fitHeight="100">-->
+<!--        <image>-->
+<!--          <Image url="@/client/resources/logo/multichat_banner.png"/>-->
+<!--        </image>-->
+<!--      </ImageView>-->
+<!--      <StackPane maxHeight = "450">-->
+<!--        <ScrollPane minHeight="450" maxHeight="450" minWidth="600" fx:id="scrollPane">-->
+<!--          <VBox fx:id="chatLog" minWidth="590" spacing="3">-->
+<!--            <padding>-->
+<!--              <Insets top="8" right="8" bottom="8" left="8"/>-->
+<!--            </padding>-->
+<!--          </VBox>-->
+<!--        </ScrollPane>-->
+<!--        <VBox fx:id = "fileButtons"  translateY = "450">-->
+<!--          <style>-->
+<!--            -fx-background-color: rgba(255, 255, 255, 0.5);-->
+<!--          </style>-->
+<!--          <HBox spacing = "10" prefHeight = "50">-->
+<!--            <padding>-->
+<!--              <Insets top="10" right="10" bottom="10" left="10"/>-->
+<!--            </padding>-->
+<!--            <Button onAction="#openFileExplorer"> Upload Images </Button>-->
+<!--            <Button> Upload Files </Button>-->
+<!--            <Button> Voice Recording </Button>-->
+<!--            <Button onAction = "#showEmotePanel"> Emotes </Button>-->
+<!--          </HBox>-->
+<!--          <ScrollPane prefHeight = "100"  prefWidth = "600" >-->
+<!--            <padding>-->
+<!--              <Insets top = "5" right = "5" bottom = "5" left = "5"></Insets>-->
+<!--            </padding>-->
+<!--            <VBox>-->
+<!--              <padding>-->
+<!--                <Insets top = "2" right = "2" bottom = "2" left = "2"></Insets>-->
+<!--              </padding>-->
+<!--              <style>-->
+<!--                -fx-border-color: blue;-->
+<!--                -fx-border-width: 1;-->
+<!--                -fx-border-insets: 3;-->
+<!--              </style>-->
+<!--              <Text>-->
+<!--                <style>-->
+<!--                  -fx-font: 15px Verdana;-->
+<!--                </style>-->
+<!--                Standard-->
+<!--              </Text>-->
+<!--              <GridPane fx:id = "standardEmotePanel" vgap = "5" hgap = "5">-->
+<!--                <padding>-->
+<!--                  <Insets top = "2" right = "2" bottom = "2" left = "2"></Insets>-->
+<!--                </padding>-->
+<!--              </GridPane>-->
+<!--              <Separator></Separator>-->
+<!--              <Text>-->
+<!--                <style>-->
+<!--                  -fx-font: 15px Verdana;-->
+<!--                </style>-->
+<!--                Twitch-->
+<!--              </Text>-->
+<!--              <GridPane fx:id = "twitchEmotePanel" vgap = "5" hgap = "5">-->
+<!--                <padding>-->
+<!--                  <Insets top = "2" right = "2" bottom = "2" left = "2"></Insets>-->
+<!--                </padding>-->
+<!--              </GridPane>-->
+<!--            </VBox>-->
+
+<!--          </ScrollPane>-->
+<!--        </VBox>-->
+<!--      </StackPane>-->
+<!--    </VBox>-->
+<!--    <HBox spacing="10" alignment="CENTER">-->
+<!--      <padding>-->
+<!--        <Insets top="10" right="10" bottom="10" left="10"/>-->
+<!--      </padding>-->
+<!--      <style>-->
+<!--        -fx-background-color: rgba(0, 162, 232, 1)-->
+<!--      </style>-->
+<!--      <Button text = "+" onAction="#showButtonPanel">-->
+<!--        <style>-->
+<!--          -fx-background-radius: 1em;-->
+<!--          -fx-font-size:15;-->
+<!--        </style>-->
+<!--      </Button>-->
+<!--      <Separator orientation="VERTICAL"></Separator>-->
+<!--      <TextArea promptText="Type here..." fx:id="chatField" maxHeight="10" wrapText="true"-->
+<!--        onKeyPressed="#onEnter" prefWidth="500">-->
+<!--        <style>-->
+<!--          -fx-focus-color: transparent;-->
+<!--          -fx-background-color: rgba(255, 255, 255, 1);-->
+<!--          -fx-padding: 0.333333em 1em 0.333333em 1em;-->
+<!--          -fx-border-radius: 20;-->
+<!--          -fx-background-radius: 20;-->
+<!--        </style>-->
+<!--      </TextArea>-->
+<!--    </HBox>-->
+<!--  </VBox>-->
+<!--</VBox>-->
