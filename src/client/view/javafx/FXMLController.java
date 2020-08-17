@@ -3,6 +3,8 @@ package client.view.javafx;
 import client.controller.Feature;
 import client.view.MultiChatView;
 import java.awt.print.PrinterException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -186,7 +188,13 @@ public class FXMLController {
         bubbleWithMsg.setAlignment(Pos.BASELINE_LEFT);
       }
 
-      HBox surface = textMessageWithImages(words, c); //contains the texts and images sent
+      HBox surface;
+      if(protocol.equals("FILE")) {
+        surface = createHyperLink(msg);
+      } else {
+        surface = textMessageWithImages(words, c); //contains the texts and images sent
+      }
+
       //holds the surface HBox to ensure stackpane alignment affects all children
       Group message = new Group(surface);
       Rectangle rect;
@@ -283,6 +291,14 @@ public class FXMLController {
     }
   }
 
+  private HBox createHyperLink(String hyperLink) {
+    HBox surface = new HBox();
+    Hyperlink link = new Hyperlink(hyperLink);
+    link.setOnAction(e -> features.sendTextOut("/requestfile " + hyperLink));
+    surface.getChildren().add(link);
+    return surface;
+  }
+
   public void setTextFieldEditable(boolean b) {
     chatField.setEditable(b);
   }
@@ -361,10 +377,41 @@ public class FXMLController {
       dialog.setTitle("Select a file to upload.");
       File selected = dialog.showOpenDialog(scene.getWindow());
       if (!(selected == null)) {
-        if (selected.length() > 25000000) {
+        if (selected.length() < 25000000) {
+          try {
+            features.sendFile(selected.getName(), selected.length(), selected);
+          } catch(IOException ioe) {
+            displayError(true, "Something went wrong with sending the file!");
+          }
 
         } else {
+          appendChatLog("The file size cannot exceed 25mb", "orange", false, "MESSAGEHELP");
+        }
+      }
+    });
+  }
 
+  @FXML
+  private void openImageExplorer() {
+    Platform.runLater(() -> {
+      FileChooser dialog = new FileChooser();
+      dialog.getExtensionFilters().addAll(
+//          new FileChooser.ExtensionFilter("All Images", "*.*"),
+          new FileChooser.ExtensionFilter("PNG", "*.png"),
+          new FileChooser.ExtensionFilter("JPG", "*.jpg")
+      );
+      dialog.setTitle("Select a file to upload.");
+      File selected = dialog.showOpenDialog(scene.getWindow());
+      if (!(selected == null)) {
+        if (selected.length() < 25000000) {
+          try {
+            features.sendFile(selected.getName(), selected.length(), selected);
+          } catch(IOException ioe) {
+            displayError(true, "Something went wrong with sending the file!");
+          }
+
+        } else {
+          appendChatLog("The file size cannot exceed 25mb", "orange", false, "MESSAGEHELP");
         }
       }
     });

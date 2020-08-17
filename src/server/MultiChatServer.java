@@ -1,5 +1,8 @@
 package server;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -253,6 +256,28 @@ public class MultiChatServer {
           String messageAndReceiver = inputWithoutDate.substring(inputWithoutDate.indexOf(": ") + 2);
           String message = messageAndReceiver.substring(messageAndReceiver.indexOf(": ") + 2);
           printPrivMsg(sender, receiver, message);
+        } else if(input.toLowerCase().startsWith("/image ")) {
+          String fileName = input.substring(7, input.lastIndexOf(":"));
+          Long fileSize = Long.parseLong(input.substring(input.lastIndexOf(":") + 1));
+          System.out.println("Receiving file: " + fileName + " size: " + fileSize);
+
+          try {
+            byte[] buf = new byte[4096];
+            FileOutputStream fos = new FileOutputStream(new File(fileName));
+            while(fileSize > 0 && clientSocket.getInputStream().read(buf, 0, (int)Math.min(buf.length, fileSize)) > -1) {
+              fos.write(buf, 0, buf.length);
+              fos.flush();
+              fileSize -= buf.length;
+            }
+            fos.close();
+            for(PrintWriter writer : outputWriters) {
+              writer.println("FILE " + fileName);
+            }
+          } catch(FileNotFoundException fnfe) {
+            out.println("FAILEDFILETRANSFER Improper file name");
+          } catch(IOException ioe) {
+            out.println("FAILEDFILETRANSFER Error communicating with server");
+          }
         } else {
           for (PrintWriter writer : outputWriters) {
             writer.println("MESSAGE " + "[" + new Date().toString() + "] " + name + ": " +input);

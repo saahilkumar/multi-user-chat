@@ -1,5 +1,8 @@
 package client.model;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -132,5 +135,21 @@ public class MultiChatModelImpl implements MultiChatModel {
   @Override
   public String getUsername() {
     return this.username;
+  }
+
+  @Override
+  public void sendFile(String fileName, long fileSize, File file) throws IOException {
+    System.out.println("/image " + fileName + ":" + fileSize);
+    out.println("/image " + fileName + ":" + fileSize);
+    FileInputStream fis = new FileInputStream(file);
+    BufferedInputStream bis = new BufferedInputStream(fis);
+    byte[] buffer = new byte[4096];
+    while(bis.read(buffer, 0, (int)Math.min(buffer.length, fileSize)) > -1) {
+      socket.getOutputStream().write(buffer, 0, buffer.length);
+    }
+
+    socket.getOutputStream().flush();
+    bis.close();
+    fis.close();
   }
 }

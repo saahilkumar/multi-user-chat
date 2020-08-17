@@ -1,5 +1,7 @@
 package client.model;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
 
@@ -15,4 +17,6 @@ public interface MultiChatModel {
   void setUsername(String username);
 
   String getUsername();
+
+  void sendFile(String fileName, long fileSize, File file) throws IOException;
 }
