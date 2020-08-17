@@ -12,6 +12,7 @@ import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -48,6 +49,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.imageio.ImageIO;
 
 public class FXMLController {
   private Feature features;
@@ -295,6 +297,19 @@ public class FXMLController {
     HBox surface = new HBox();
     Hyperlink link = new Hyperlink(hyperLink);
     link.setOnAction(e -> features.sendTextOut("/requestfile " + hyperLink));
+//    link.setOnAction(e -> {
+//      FileChooser fileChooser = new FileChooser();
+//      fileChooser.setTitle("Save Image");
+//      File file = fileChooser.showSaveDialog(scene.getWindow());
+//      if (file != null) {
+//        try {
+//          ImageIO.write(SwingFXUtils.fromFXImage(*image from bytes*,
+//              null), "png", file);
+//        } catch (IOException ex) {
+//          System.out.println(ex.getMessage());
+//        }
+//      }
+//    });
     surface.getChildren().add(link);
     return surface;
   }
@@ -619,9 +634,22 @@ public class FXMLController {
       ListView<String> displayNames = new ListView<>();
       displayNames.setItems(otherUsers);
       textAndList.getChildren().addAll(header, displayNames);
-      layout.getChildren().addAll(banner, textAndList);
+      textAndList.setAlignment(Pos.CENTER);
+
+      Button submit = new Button("Create Chat");
+      layout.getChildren().addAll(banner, textAndList, submit);
+      layout.setAlignment(Pos.CENTER);
 
       Stage newChatWindow = new Stage();
+
+      submit.setOnAction(e -> {
+        String chosen = displayNames.getSelectionModel().getSelectedItem();
+        if(chosen != null) {
+          openPrivateMessagingWindow(chosen);
+          newChatWindow.close();
+        }
+      });
+
       newChatWindow.initModality(Modality.APPLICATION_MODAL);
       newChatWindow.setScene(new Scene(layout));
       newChatWindow.setTitle("Start a new chat");

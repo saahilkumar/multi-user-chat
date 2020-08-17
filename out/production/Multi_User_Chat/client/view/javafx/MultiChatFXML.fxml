@@ -29,6 +29,13 @@
           <HBox spacing = "10">
             <padding><Insets top = "10" right = "10" bottom = "10" left = "10"></Insets></padding>
             <Button focusTraversable="false" onAction = "#openNewChatWindow">
+              <graphic>
+                <ImageView fitHeight="20" fitWidth="20" pickOnBounds="true" preserveRatio="true">
+                  <image>
+                    <Image url="@/client/resources/logo/new_message_icon.png" />
+                  </image>
+                </ImageView>
+              </graphic>
               <style>
                 -fx-background-radius: 10em;
                 -fx-focus-color: transparent;
@@ -40,6 +47,13 @@
               </style>
             </Button>
             <Button focusTraversable="false" onAction = "#openSettingsPanel">
+              <graphic>
+                <ImageView fitHeight="20" fitWidth="20" pickOnBounds="true" preserveRatio="true">
+                  <image>
+                    <Image url="@/client/resources/logo/settings_icon.png" />
+                  </image>
+                </ImageView>
+              </graphic>
               <style>
                 -fx-background-radius: 10em;
                 -fx-focus-color: transparent;
