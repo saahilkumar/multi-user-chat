@@ -19,4 +19,6 @@ public interface MultiChatModel {
   String getUsername();
 
   void sendFile(String fileName, long fileSize, File file) throws IOException;
+
+  void saveFile(File file, long fileSize);
 }

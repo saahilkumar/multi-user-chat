@@ -2,6 +2,7 @@ package client.view.javafx;
 
 import client.controller.Feature;
 import client.view.MultiChatView;
+import java.io.File;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -116,6 +117,11 @@ public class FXEntryPoint extends Application implements MultiChatView {
   @Override
   public void setActiveServers(List<String> activeServers) {
     controller.setActiveServers(activeServers);
+  }
+
+  @Override
+  public File showSaveDialog(String fileName) {
+    return controller.showSaveDialog(fileName);
   }
 
   @Override

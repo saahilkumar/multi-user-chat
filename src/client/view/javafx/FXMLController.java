@@ -81,6 +81,11 @@ public class FXMLController {
   private TranslateTransition slideUp;
   private TranslateTransition slideDown;
   private TranslateTransition slideFurtherUp;
+  private File chosenFile;
+
+  // settings
+  private boolean isDarkMode = false;
+  private boolean muted = false;
 
   public void setFeatures(Feature features) {
     this.features = features;
@@ -147,10 +152,15 @@ public class FXMLController {
         });
       }
     } else {
+      Color c = getColor(color);
+      if(features.getClientUsername().equals(extractName(s))) {
+        c = Color.WHITE;
+      }
+
       if (hasDate) {
-        appendMessage(formatDate(s), getColor(color), hasDate, protocol);
+        appendMessage(formatDate(s), c, hasDate, protocol);
       } else {
-        appendMessage(s, getColor(color), hasDate, protocol);
+        appendMessage(s, c, hasDate, protocol);
       }
     }
 
@@ -177,7 +187,7 @@ public class FXMLController {
       messageContainer.setMaxWidth(Double.MAX_VALUE); //the stackpane fills to the width of chatlog
       bubbleWithMsg.setMaxWidth(Double.MAX_VALUE);
 
-      if (!protocol.equals("MESSAGE") && !protocol.equals("WHISPER")) {
+      if (!protocol.equals("MESSAGE") && !protocol.equals("WHISPER") && !protocol.equals("FILE")) {
         messageContainer.setAlignment(Pos.CENTER); //if it is not user text, center it (ie. black text messages)
         bubbleWithMsg.setAlignment(Pos.CENTER); //if it is not user text, center it (ie. black text messages)
       } else if (extractName(msg).equals(features.getClientUsername())) {
@@ -251,9 +261,10 @@ public class FXMLController {
     rect.setY(0);
     rect.setWidth(surface.prefWidth(-1));
     rect.setHeight(surface.prefHeight(-1));
+
     rect.setArcWidth(20);
     rect.setArcHeight(20);
-    if (protocol.equals("MESSAGE")) {
+    if (protocol.equals("MESSAGE") || protocol.equals("FILE")) {
       if (extractName(msg).equals(features.getClientUsername())) {
         rect.setFill(Color.CORNFLOWERBLUE);
       } else {
@@ -293,24 +304,37 @@ public class FXMLController {
     }
   }
 
-  private HBox createHyperLink(String hyperLink) {
+  private HBox createHyperLink(String msg) {
     HBox surface = new HBox();
-    Hyperlink link = new Hyperlink(hyperLink);
-    link.setOnAction(e -> features.sendTextOut("/requestfile " + hyperLink));
-//    link.setOnAction(e -> {
+    surface.setPadding(new Insets(5,5,5,5));
+    surface.setAlignment(Pos.CENTER);
+    Text name = new Text(extractName(msg) + ": ");
+    String filename = msg.substring(msg.indexOf(": ") + 2);
+    Hyperlink link = new Hyperlink();
+    link.setPrefSize(40, 20);
+    link.setText(filename);
+    link.setPrefWidth(new Text(filename).prefWidth(-1));
+    if(features.getClientUsername().equals(extractName(msg))) {
+      name.setFill(Color.WHITE);
+      link.setTextFill(Color.WHITE);
+    }
+    link.setOnAction(e -> features.sendTextOut("/requestfile " + filename));
+//      link.setOnAction(e -> {
 //      FileChooser fileChooser = new FileChooser();
-//      fileChooser.setTitle("Save Image");
+//      fileChooser.setTitle("Save File");
 //      File file = fileChooser.showSaveDialog(scene.getWindow());
 //      if (file != null) {
 //        try {
-//          ImageIO.write(SwingFXUtils.fromFXImage(*image from bytes*,
+//          ImageIO.write(SwingFXUtils.fromFXImage(image from bytes,
 //              null), "png", file);
 //        } catch (IOException ex) {
 //          System.out.println(ex.getMessage());
 //        }
 //      }
 //    });
+    surface.getChildren().add(name);
     surface.getChildren().add(link);
+    surface.setPrefWidth(name.prefWidth(-1) + link.prefWidth(-1));
     return surface;
   }
 
@@ -369,7 +393,7 @@ public class FXMLController {
 
   @FXML
   private void openSettingsPanel() {
-
+    new SettingsPanel();
   }
 
   @FXML
@@ -595,6 +619,20 @@ public class FXMLController {
     });
   }
 
+  public File showSaveDialog(String fileName) {
+    Platform.runLater(() -> {
+      FileChooser chooser = new FileChooser();
+      chooser.setInitialFileName(fileName);
+      File file = chooser.showSaveDialog(scene.getWindow());
+      setChosenFile(file);
+    });
+    return chosenFile;
+  }
+
+  private void setChosenFile(File file) {
+    chosenFile = file;
+  }
+
 //
 //  private void sendPrivateMessage() {
 //
@@ -659,13 +697,37 @@ public class FXMLController {
     }
   }
 
-//    public void setDarkMode() {
-//        if(darkModeMenuItem.isSelected()) {
-//            darkModeMenuItem.setText("Disable Dark Mode");
-//            scene.getStylesheets().add(getClass().getResource("Darkmode.css").toExternalForm());
-//        } else {
-//            darkModeMenuItem.setText("Enable Dark Mode");
-//            scene.getStylesheets().remove(getClass().getResource("Darkmode.css").toExternalForm());
-//        }
-//    }
+  private class SettingsPanel {
+    private SettingsPanel() {
+      Stage settingsWindow = new Stage();
+      VBox layout = new VBox();
+      layout.setPadding(new Insets(20, 20, 20, 20));
+      layout.setSpacing(20);
+
+      CheckBox mute = new CheckBox("Mute Notification Sounds");
+      mute.setSelected(muted);
+
+      CheckBox darkMode = new CheckBox("Dark Mode");
+      darkMode.setSelected(isDarkMode);
+      darkMode.setOnAction(e -> setDarkMode(darkMode.isSelected()));
+
+      layout.getChildren().addAll(mute, new Separator(), darkMode);
+
+      settingsWindow.initModality(Modality.APPLICATION_MODAL);
+      settingsWindow.setScene(new Scene(layout));
+      settingsWindow.setTitle("Settings");
+      settingsWindow.setResizable(false);
+      settingsWindow.sizeToScene();
+      settingsWindow.showAndWait();
+    }
+  }
+
+    public void setDarkMode(boolean isSelected) {
+      isDarkMode = isSelected;
+      if(isSelected) {
+          scene.getStylesheets().add(getClass().getResource("Darkmode2.css").toExternalForm());
+      } else {
+          scene.getStylesheets().remove(getClass().getResource("Darkmode2.css").toExternalForm());
+      }
+    }
 }

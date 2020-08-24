@@ -1,11 +1,14 @@
 package server;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.Buffer;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -256,27 +259,30 @@ public class MultiChatServer {
           String messageAndReceiver = inputWithoutDate.substring(inputWithoutDate.indexOf(": ") + 2);
           String message = messageAndReceiver.substring(messageAndReceiver.indexOf(": ") + 2);
           printPrivMsg(sender, receiver, message);
-        } else if(input.toLowerCase().startsWith("/image ")) {
-          String fileName = input.substring(7, input.lastIndexOf(":"));
+        } else if(input.toLowerCase().startsWith("/file ")) {
+          String fileName = input.substring(6, input.lastIndexOf(":"));
           Long fileSize = Long.parseLong(input.substring(input.lastIndexOf(":") + 1));
-          System.out.println("Receiving file: " + fileName + " size: " + fileSize);
-
+          System.out.println("Receiving file: " + fileName);
+          outputFile(fileName, fileSize);
+        } else if(input.toLowerCase().startsWith("/requestfile ")) {
           try {
-            byte[] buf = new byte[4096];
-            FileOutputStream fos = new FileOutputStream(new File(fileName));
-            while(fileSize > 0 && clientSocket.getInputStream().read(buf, 0, (int)Math.min(buf.length, fileSize)) > -1) {
-              fos.write(buf, 0, buf.length);
-              fos.flush();
-              fileSize -= buf.length;
+            String fileName = input.substring(13);
+            File requested = new File(this.getClass().getClassLoader().getResource(fileName).getPath());
+            long fileSize = requested.length();
+            out.println("FILEDATA " + fileSize + ":" + fileName);
+
+            byte[] buffer = new byte[4096];
+            FileInputStream fis = new FileInputStream(requested);
+            BufferedInputStream bis = new BufferedInputStream(fis);
+            int amountRead;
+            while((amountRead = bis.read(buffer, 0, buffer.length)) > -1) {
+              clientSocket.getOutputStream().write(buffer, 0, amountRead);
             }
-            fos.close();
-            for(PrintWriter writer : outputWriters) {
-              writer.println("FILE " + fileName);
-            }
-          } catch(FileNotFoundException fnfe) {
-            out.println("FAILEDFILETRANSFER Improper file name");
+            clientSocket.getOutputStream().flush();
+            fis.close();
+            bis.close();
           } catch(IOException ioe) {
-            out.println("FAILEDFILETRANSFER Error communicating with server");
+            out.append("FAILEDFILETRANSFER Error fetching file");
           }
         } else {
           for (PrintWriter writer : outputWriters) {
@@ -353,7 +359,12 @@ public class MultiChatServer {
       // if this is the first vote for someone, then start the votekick
       if(curVictim == null) {
         for(PrintWriter writer : outputWriters) {
-          writer.println("VOTEKICK Someone has started a votekick for " + victim + "!");
+          if(writer.equals(out)) {
+            writer.println("VOTEKICK You have started a votekick for " + victim + "!");
+          }
+          else {
+            writer.println("VOTEKICK Someone has started a votekick for " + victim + "!");
+          }
         }
         numVotes = 1;
         curVictim = victim;
@@ -429,6 +440,26 @@ public class MultiChatServer {
           sender + ": " + receiver + ": " + msg);
       users.get(receiver).out.println("PRIVATEMESSAGE " + "[" + new Date().toString() + "] " +
           sender + ": " + receiver + ": " + msg);
+    }
+
+    private void outputFile(String fileName, long fileSize) {
+      try {
+        byte[] buf = new byte[4096];
+        FileOutputStream fos = new FileOutputStream(new File(fileName));
+        while(fileSize > 0 && clientSocket.getInputStream().read(buf, 0, (int)Math.min(buf.length, fileSize)) > -1) {
+          fos.write(buf, 0, buf.length);
+          fos.flush();
+          fileSize -= buf.length;
+        }
+        fos.close();
+        for(PrintWriter writer : outputWriters) {
+          writer.println("FILE " + "[" + new Date() + "] " + name + ": " + fileName);
+        }
+      } catch(FileNotFoundException fnfe) {
+        out.println("FAILEDFILETRANSFER Improper file name");
+      } catch(IOException ioe) {
+        out.println("FAILEDFILETRANSFER Error communicating with server");
+      }
     }
 
     private void updateActiveUsers() {

@@ -3,6 +3,7 @@ package client.model;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -139,17 +140,40 @@ public class MultiChatModelImpl implements MultiChatModel {
 
   @Override
   public void sendFile(String fileName, long fileSize, File file) throws IOException {
-    System.out.println("/image " + fileName + ":" + fileSize);
-    out.println("/image " + fileName + ":" + fileSize);
+    System.out.println("/file " + fileName + ":" + fileSize);
+    out.println("/file " + fileName + ":" + fileSize);
     FileInputStream fis = new FileInputStream(file);
     BufferedInputStream bis = new BufferedInputStream(fis);
     byte[] buffer = new byte[4096];
-    while(bis.read(buffer, 0, (int)Math.min(buffer.length, fileSize)) > -1) {
-      socket.getOutputStream().write(buffer, 0, buffer.length);
+    int amountRead;
+    while((amountRead = bis.read(buffer, 0, buffer.length)) > -1) {
+      socket.getOutputStream().write(buffer, 0, amountRead);
     }
 
     socket.getOutputStream().flush();
     bis.close();
     fis.close();
+  }
+
+  @Override
+  public void saveFile(File file, long fileSize) {
+    try {
+      if (file != null) {
+        byte[] buf = new byte[4096];
+        FileOutputStream fos = new FileOutputStream(file);
+
+        while (fileSize > 0
+            && socket.getInputStream().read(buf, 0, (int) Math.min(buf.length, fileSize)) > -1) {
+          fos.write(buf, 0, buf.length);
+          fos.flush();
+          fileSize -= buf.length;
+        }
+        fos.close();
+      } else {
+        socket.getInputStream().skip(fileSize);
+      }
+    } catch(IOException ioe) {
+      // TODO: handle
+    }
   }
 }

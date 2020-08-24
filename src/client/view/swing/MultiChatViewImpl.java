@@ -10,6 +10,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -457,6 +458,11 @@ public class MultiChatViewImpl extends JFrame implements MultiChatView {
   @Override
   public void displayError(boolean remainRunningWhenClosed, String errorMessage) {
     return;
+  }
+
+  @Override
+  public File showSaveDialog(String fileName) {
+    return null;
   }
 
 }

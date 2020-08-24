@@ -107,7 +107,6 @@
               </padding>
               <Button onAction="#openImageExplorer"> Upload Images </Button>
               <Button onAction="#openFileExplorer"> Upload Files </Button>
-              <Button> Voice Recording </Button>
               <Button onAction = "#showEmotePanel"> Emotes </Button>
             </HBox>
             <ScrollPane prefHeight = "100"  prefWidth = "600" >
