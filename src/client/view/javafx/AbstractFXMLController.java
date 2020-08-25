@@ -2,6 +2,7 @@ package client.view.javafx;
 
 import client.controller.Feature;
 import client.view.MultiChatView;
+import java.net.URL;
 import java.util.Map;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
@@ -27,6 +28,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -53,6 +56,7 @@ public class AbstractFXMLController {
   protected TranslateTransition slideFurtherUp;
 
   protected Feature features;
+  protected String preface;
 
 
   protected void initController() {
@@ -78,7 +82,7 @@ public class AbstractFXMLController {
       Background backGround = new Background(bImage);
       emoteButton.setBackground(backGround);
       emoteButton.setOnAction(e -> {
-        features.sendTextOut(emote);
+        features.sendTextOut(preface + emote);
       });
       panel.add(emoteButton, column, row);
       column++;
@@ -100,7 +104,7 @@ public class AbstractFXMLController {
   }
 
   @FXML
-  protected void onEnter(KeyEvent ke, String preface) {
+  protected void onEnter(KeyEvent ke) {
     String text = chatField.getText();
     if (ke.getCode() == KeyCode.ENTER) {
       if (text.isBlank()) {

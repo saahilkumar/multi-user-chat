@@ -19,6 +19,7 @@ public class PrivateMessagingController extends AbstractFXMLController {
   public void initialize(String receiver, String sender, Feature features, Stage window) {
     this.receiver = receiver;
     this.sender = sender;
+    this.preface = "/privatemsg " + sender + ": " + receiver + ": ";
     this.features = features;
     this.window = window;
 
@@ -40,12 +41,6 @@ public class PrivateMessagingController extends AbstractFXMLController {
       }
     });
   }
-
-  @FXML
-  private void onEnter(KeyEvent ke) {
-    super.onEnter(ke, "/privatemsg " + sender + ": " + receiver + ": ");
-  }
-
 
   public String getReceiver() {
     return receiver;

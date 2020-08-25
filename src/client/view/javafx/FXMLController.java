@@ -1,10 +1,15 @@
 package client.view.javafx;
 
 import client.controller.Feature;
+import com.sun.scenario.Settings;
+import java.awt.Toolkit;
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -16,8 +21,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
@@ -50,6 +56,14 @@ public class FXMLController extends AbstractFXMLController {
   private boolean isDarkMode = false;
   private boolean muted = false;
 
+  private NewChatPanel newChatPanel = new NewChatPanel();
+  private SettingsPanel settingsPanel = new SettingsPanel();
+
+  // info for playing notifs
+//  private final URL soundFile = getClass().getResource("/client/resources/sounds/notification.wav");
+//  private final Media media = new Media(soundFile.toString());
+//  private final MediaPlayer mediaPlayer = new MediaPlayer(media);
+
   private static Color randomColor() {
     int red = ((int)(Math.random() * 255)) + 1;
     int green = ((int)(Math.random() * 255)) + 1;
@@ -62,6 +76,7 @@ public class FXMLController extends AbstractFXMLController {
   }
 
   public void initialize(Scene scene) {
+    this.preface = "";
     this.scene = scene;
     this.serverListView.setItems(serverList);
     this.userListView.setItems(userList);
@@ -69,12 +84,10 @@ public class FXMLController extends AbstractFXMLController {
     super.initController();
   }
 
-  @FXML
-  private void onEnter(KeyEvent ke) {
-    super.onEnter(ke, "");
-  }
-
   public void appendChatLog(String s, String color, boolean hasDate, String protocol) {
+    if(!scene.getWindow().isFocused() && !muted) {
+      playNotif();
+    }
     if(features.getClientUsername().equals(extractName(s))) {
       color = "white";
     }
@@ -143,12 +156,12 @@ public class FXMLController extends AbstractFXMLController {
 
   @FXML
   private void openSettingsPanel() {
-    new SettingsPanel();
+    settingsPanel.display();
   }
 
   @FXML
   private void openNewChatWindow() {
-    new NewChatPanel();
+    newChatPanel.display();
   }
 
   private void mapNameToColor(List<String> listOfNames) {
@@ -262,6 +275,14 @@ public class FXMLController extends AbstractFXMLController {
     }
   }
 
+  protected void playNotif(){
+    // cl is the ClassLoader for the current class, ie. CurrentClass.class.getClassLoader();
+  final URL soundFile = getClass().getResource("/client/resources/sounds/notification.wav");
+  final Media media = new Media(soundFile.toString());
+  final MediaPlayer mediaPlayer = new MediaPlayer(media);
+  mediaPlayer.play();
+  }
+
   private class Cell extends ListCell<String> {
     private boolean isUserList;
 
@@ -315,32 +336,27 @@ public class FXMLController extends AbstractFXMLController {
   }
 
   private class NewChatPanel {
-    private NewChatPanel() {
-      ObservableList<String> otherUsers = FXCollections.observableArrayList();
-      for (String user : userList) {
-        if (!user.equals(features.getClientUsername())) {
-          otherUsers.add(user);
-        }
-      }
 
+    private Stage newChatWindow = new Stage();
+    private ObservableList<String> otherUsers = FXCollections.observableArrayList();
+
+    private NewChatPanel() {
       VBox layout = new VBox();
       ImageView banner = new ImageView(new Image(getClass().getResourceAsStream(
           "/client/resources/logo/multichat_full_logo.png")));
-      VBox textAndList = new VBox();
-      textAndList.setPadding(new Insets(5, 5, 5, 5));
-      textAndList.setSpacing(5);
+      VBox content = new VBox();
+      content.setPadding(new Insets(5, 5, 5, 5));
+      content.setSpacing(5);
       Text header = new Text("Please select a user to start chatting with.");
       header.setFont(new Font("Verdana", 12));
       ListView<String> displayNames = new ListView<>();
       displayNames.setItems(otherUsers);
-      textAndList.getChildren().addAll(header, displayNames);
-      textAndList.setAlignment(Pos.CENTER);
+      content.getChildren().addAll(header, displayNames);
+      content.setAlignment(Pos.CENTER);
 
       Button submit = new Button("Create Chat");
-      layout.getChildren().addAll(banner, textAndList, submit);
+      layout.getChildren().addAll(banner, content, submit);
       layout.setAlignment(Pos.CENTER);
-
-      Stage newChatWindow = new Stage();
 
       submit.setOnAction(e -> {
         String chosen = displayNames.getSelectionModel().getSelectedItem();
@@ -350,24 +366,40 @@ public class FXMLController extends AbstractFXMLController {
         }
       });
 
+      newChatWindow.setOnCloseRequest(e -> {
+        e.consume();
+        newChatWindow.hide();
+      });
       newChatWindow.initModality(Modality.APPLICATION_MODAL);
       newChatWindow.setScene(new Scene(layout));
       newChatWindow.setTitle("Start a new chat");
       newChatWindow.setResizable(false);
       newChatWindow.sizeToScene();
+    }
+
+    private void display() {
+      otherUsers.clear();
+      for (String user : userList) {
+        if (!user.equals(features.getClientUsername())) {
+          otherUsers.add(user);
+        }
+      }
+
       newChatWindow.showAndWait();
     }
   }
 
   private class SettingsPanel {
+
+    private Stage settingsWindow = new Stage();
     private SettingsPanel() {
-      Stage settingsWindow = new Stage();
       VBox layout = new VBox();
       layout.setPadding(new Insets(20, 20, 20, 20));
       layout.setSpacing(20);
 
       CheckBox mute = new CheckBox("Mute Notification Sounds");
       mute.setSelected(muted);
+      mute.setOnAction(e -> muted = mute.isSelected());
 
       CheckBox darkMode = new CheckBox("Dark Mode");
       darkMode.setSelected(isDarkMode);
@@ -375,11 +407,18 @@ public class FXMLController extends AbstractFXMLController {
 
       layout.getChildren().addAll(mute, new Separator(), darkMode);
 
+      settingsWindow.setOnCloseRequest(e -> {
+        e.consume();
+        settingsWindow.hide();
+      });
       settingsWindow.initModality(Modality.APPLICATION_MODAL);
       settingsWindow.setScene(new Scene(layout));
       settingsWindow.setTitle("Settings");
       settingsWindow.setResizable(false);
       settingsWindow.sizeToScene();
+    }
+
+    private void display() {
       settingsWindow.showAndWait();
     }
   }
