@@ -1,10 +1,31 @@
 .root {
-  -fx-accent: #1e74c6;
+  -fx-accent: #00a2e8;
   -fx-focus-color: -fx-accent;
-  /*-fx-base: #373e43;*/
   -fx-base: #222222;
   -fx-control-inner-background: derive(-fx-base, 35%);
   -fx-control-inner-background-alt: -fx-control-inner-background ;
+}
+
+.chat-and-settings-button {
+  -fx-background-radius: 10em;
+  -fx-focus-color: transparent;
+  -fx-min-width: 30px;
+  -fx-min-height: 30px;
+  -fx-max-width: 30px;
+  -fx-max-height: 30px;
+  -fx-background-color:  derive(-fx-base, 50%);
+}
+
+.chat-field-container {
+  -fx-background-color: derive(-fx-base, 10%);
+}
+
+.chat-field {
+  -fx-focus-color: transparent;
+  -fx-padding: 0.333333em 1em 0.333333em 1em;
+  -fx-border-radius: 20;
+  -fx-background-radius: 20;
+  -fx-background-color:  derive(-fx-base, 35%);
 }
 
 .label{
@@ -13,6 +34,8 @@
 
 .text-area {
   -fx-prompt-text-fill: #AAAAAA;
+  -fx-control-inner-background: derive(-fx-base, 35%);
+  -fx-background-color:  derive(-fx-base, 35%);
 }
 
 .titulo{
@@ -20,16 +43,12 @@
   -fx-font-size: 18px;
 }
 
-.button{
-  -fx-focus-traversable: false;
-}
-
 .button:hover{
-  -fx-text-fill: white;
+  -fx-background-color:  derive(-fx-base, 70%);
 }
 
-.separator *.line {
-  -fx-background-color: #3C3C3C;
+.separator.line {
+  -fx-background-color: #FFFFFF;
   -fx-border-style: solid;
   -fx-border-width: 1px;
 }
@@ -38,12 +57,15 @@
   -fx-background-color: derive(-fx-base,45%)
 }
 
-.button:default {
+.button {
   -fx-base: -fx-accent ;
+  -fx-text-fill: white;
+  -fx-focus-traversable: false;
+  -fx-background-color:  derive(-fx-base, 10%);
 }
 
 .table-view{
-  /*-fx-background-color: derive(-fx-base, 10%);*/
+  -fx-background-color: derive(-fx-base, 10%);
   -fx-selection-bar-non-focused: derive(-fx-base, 50%);
 }
 

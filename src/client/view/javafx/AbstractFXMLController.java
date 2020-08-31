@@ -191,11 +191,11 @@ public class AbstractFXMLController {
   private Color getColor(String color) {
     switch (color) {
       case "blue":
-        return Color.BLUE;
+        return Color.CORNFLOWERBLUE;
       case "red":
-        return Color.RED;
+        return Color.INDIANRED;
       case "green":
-        return Color.GREEN;
+        return Color.LIMEGREEN;
       case "orange":
         return Color.ORANGE;
       case "white":

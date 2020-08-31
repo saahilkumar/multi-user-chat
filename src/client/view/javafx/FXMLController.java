@@ -76,6 +76,7 @@ public class FXMLController extends AbstractFXMLController {
   }
 
   public void initialize(Scene scene) {
+    scene.getStylesheets().add(getClass().getResource("Lightmode.css").toExternalForm());
     this.preface = "";
     this.scene = scene;
     this.serverListView.setItems(serverList);
@@ -269,9 +270,11 @@ public class FXMLController extends AbstractFXMLController {
   public void setDarkMode(boolean isSelected) {
     isDarkMode = isSelected;
     if(isSelected) {
-        scene.getStylesheets().add(getClass().getResource("Darkmode2.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("Darkmode.css").toExternalForm());
+        scene.getStylesheets().remove(getClass().getResource("Lightmode.css").toExternalForm());
     } else {
-        scene.getStylesheets().remove(getClass().getResource("Darkmode2.css").toExternalForm());
+      scene.getStylesheets().add(getClass().getResource("Lightmode.css").toExternalForm());
+      scene.getStylesheets().remove(getClass().getResource("Darkmode.css").toExternalForm());
     }
   }
 
