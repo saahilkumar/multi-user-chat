@@ -75,6 +75,29 @@ public class MultiChatServer {
     }
     System.out.println("MultiChat Server is running...");
 
+    new Thread(() -> {
+      Scanner input = new Scanner(System.in);
+      while(input.hasNextLine()) {
+        String command = input.nextLine();
+        switch (command) {
+          case "exit":
+            System.out.println("good");
+            //send to all users its closing
+            //maybe a timer?
+            break;
+          case "users":
+            //get list of all users
+            break;
+          case "servers":
+            //get list of all servers
+            break;
+          default:
+            System.out.println("Invalid command.");
+        }
+      }
+      //delete user files
+    }).start();
+
     Thread masterServerCommunication = new Thread(new RunServerCommunication(args[0]));
     masterServerCommunication.start();
 
@@ -227,6 +250,7 @@ public class MultiChatServer {
       outputWriters.add(out);
       updateActiveUsers();
       updateServerList();
+      new File("resources/tempFiles/" + name).mkdirs();
       System.out.println("[" + new Date().toString() + "] " + name + " has joined.");
     }
 
@@ -266,17 +290,20 @@ public class MultiChatServer {
           outputFile(fileName, fileSize);
         } else if(input.toLowerCase().startsWith("/requestfile ")) {
           try {
-            String fileName = input.substring(13);
-            File requested = new File(this.getClass().getClassLoader().getResource(fileName).getPath());
+            String fileOwner = input.substring(13, input.indexOf(":"));
+            String fileName = input.substring(input.indexOf(":") + 1);
+            System.out.println(fileOwner);
+            System.out.println(fileName);
+            File requested = new File("resources/tempFiles/"+fileOwner+"/"+fileName);
             long fileSize = requested.length();
-            out.println("FILEDATA " + fileSize + ":" + fileName);
-
             byte[] buffer = new byte[4096];
             FileInputStream fis = new FileInputStream(requested);
             BufferedInputStream bis = new BufferedInputStream(fis);
+            System.out.println("requested = " + requested);
             int amountRead;
-            while((amountRead = bis.read(buffer, 0, buffer.length)) > -1) {
-              clientSocket.getOutputStream().write(buffer, 0, amountRead);
+            out.println("FILEDATA " + fileSize + ":" + fileName);
+            while ((amountRead = bis.read(buffer, 0, buffer.length)) > -1) {
+              clientSocket.getOutputStream().write(buffer, 0,  amountRead);
             }
             clientSocket.getOutputStream().flush();
             fis.close();
@@ -445,7 +472,9 @@ public class MultiChatServer {
     private void outputFile(String fileName, long fileSize) {
       try {
         byte[] buf = new byte[4096];
-        FileOutputStream fos = new FileOutputStream(new File(fileName));
+        File file = new File("resources/tempFiles/" + name + "/" + fileName);
+        file.createNewFile();
+        FileOutputStream fos = new FileOutputStream(file);
         while(fileSize > 0 && clientSocket.getInputStream().read(buf, 0, (int)Math.min(buf.length, fileSize)) > -1) {
           fos.write(buf, 0, buf.length);
           fos.flush();

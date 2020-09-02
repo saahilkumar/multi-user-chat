@@ -19,3 +19,7 @@
   -fx-border-radius: 20;
   -fx-background-radius: 20;
 }
+
+.emote-button {
+  -fx-focus-traversable: false;
+}

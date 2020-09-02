@@ -81,6 +81,8 @@ public class AbstractFXMLController {
 
       Background backGround = new Background(bImage);
       emoteButton.setBackground(backGround);
+      emoteButton.getStyleClass().clear();
+      emoteButton.getStyleClass().add("emote-button");
       emoteButton.setOnAction(e -> {
         features.sendTextOut(preface + emote);
       });
@@ -273,35 +275,21 @@ public class AbstractFXMLController {
 
   private HBox createHyperLink(String msg) {
     HBox surface = new HBox();
-    surface.setPadding(new Insets(5,5,5,5));
+    surface.setPadding(new Insets(5, 5, 5, 5));
     surface.setAlignment(Pos.CENTER);
     Text name = new Text(extractName(msg) + ": ");
     String filename = msg.substring(msg.indexOf(": ") + 2);
     Hyperlink link = new Hyperlink();
-    link.setPrefSize(40, 20);
     link.setText(filename);
     link.setPrefWidth(new Text(filename).prefWidth(-1));
-    if(features.getClientUsername().equals(extractName(msg))) {
+    if (features.getClientUsername().equals(extractName(msg))) {
       name.setFill(Color.WHITE);
       link.setTextFill(Color.WHITE);
     }
-    link.setOnAction(e -> features.sendTextOut("/requestfile " + filename));
-//      link.setOnAction(e -> {
-//      FileChooser fileChooser = new FileChooser();
-//      fileChooser.setTitle("Save File");
-//      File file = fileChooser.showSaveDialog(scene.getWindow());
-//      if (file != null) {
-//        try {
-//          ImageIO.write(SwingFXUtils.fromFXImage(image from bytes,
-//              null), "png", file);
-//        } catch (IOException ex) {
-//          System.out.println(ex.getMessage());
-//        }
-//      }
-//    });
+    link.setOnAction(e -> features.sendTextOut("/requestfile " + extractName(msg) + ":" + filename));
     surface.getChildren().add(name);
     surface.getChildren().add(link);
-    surface.setPrefWidth(name.prefWidth(-1) + link.prefWidth(-1));
+    surface.setPrefWidth(name.prefWidth(-1) + link.prefWidth(-1) + 10);
     return surface;
   }
 

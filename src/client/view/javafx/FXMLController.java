@@ -199,9 +199,10 @@ public class FXMLController extends AbstractFXMLController {
     Platform.runLater(() -> {
       FileChooser dialog = new FileChooser();
       dialog.getExtensionFilters().addAll(
-//          new FileChooser.ExtensionFilter("All Images", "*.*"),
+          new FileChooser.ExtensionFilter("All Images", "*.jpg", "*.png", "*.gif"),
           new FileChooser.ExtensionFilter("PNG", "*.png"),
-          new FileChooser.ExtensionFilter("JPG", "*.jpg")
+          new FileChooser.ExtensionFilter("JPG", "*.jpg"),
+          new FileChooser.ExtensionFilter("GIF", "*.gif")
       );
       dialog.setTitle("Select a file to upload.");
       File selected = dialog.showOpenDialog(scene.getWindow());

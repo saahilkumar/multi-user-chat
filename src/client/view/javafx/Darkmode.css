@@ -91,3 +91,7 @@
   -fx-border-color: transparent;
   -fx-table-cell-border-color:transparent;
 }
+
+.emote-button {
+  -fx-focus-traversable: false;
+}

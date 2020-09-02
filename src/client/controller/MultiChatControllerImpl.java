@@ -77,9 +77,8 @@ public class MultiChatControllerImpl implements MultiChatController, Feature {
       } else if(line.startsWith("FAILEDFILETRANSFER ")) {
         view.appendChatLog(line.substring(19), "red", false, "FAILEDFILETRANSFER");
       } else if(line.startsWith("FILEDATA ")) {
-        long fileSize = Long.parseLong(line.substring(9), line.indexOf(":"));
-        String fileName = line.substring(line.indexOf(":") + 1);
-        File file = view.showSaveDialog(fileName);
+        File file = view.showSaveDialog(line.substring(line.indexOf(":") + 1));
+        long fileSize = Long.parseLong(line.substring(9, line.indexOf(":")));
         model.saveFile(file, fileSize);
       } else if (line.startsWith("REQUESTEDNEWROOM ")) {
         try {
