@@ -95,3 +95,7 @@
 .emote-button {
   -fx-focus-traversable: false;
 }
+
+.file-buttons-panel {
+  -fx-background-color: rgba(50, 50, 50, 0.5);
+}
