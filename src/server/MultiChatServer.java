@@ -484,7 +484,7 @@ public class MultiChatServer {
         byte[] buf = new byte[4096];
         File file = new File("resources/tempFiles/" + name + "/" + fileName);
         file.createNewFile();
-        FileOutputStream fos = new FileOutputStream(file);
+        FileOutputStream fos = new FileOutputStream(file, false);
         while(fileSize > 0 && clientSocket.getInputStream().read(buf, 0, (int)Math.min(buf.length, fileSize)) > -1) {
           fos.write(buf, 0, buf.length);
           fos.flush();
@@ -508,7 +508,7 @@ public class MultiChatServer {
         byte[] buf = new byte[4096];
         File file = new File("resources/tempFiles/" + name + "/" + fileName);
         file.createNewFile();
-        FileOutputStream fos = new FileOutputStream(file);
+        FileOutputStream fos = new FileOutputStream(file, false);
         while(fileSize > 0 && clientSocket.getInputStream().read(buf, 0, (int)Math.min(buf.length, fileSize)) > -1) {
           fos.write(buf, 0, buf.length);
           fos.flush();

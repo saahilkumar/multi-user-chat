@@ -332,7 +332,6 @@ public class AbstractFXMLController {
     String filename = msg.substring(msg.indexOf(": ") + 2);
     Hyperlink link = new Hyperlink();
     link.setText(filename);
-    link.setPrefWidth(new Text(filename).prefWidth(-1));
     if (features.getClientUsername().equals(extractName(msg))) {
       name.setFill(Color.WHITE);
       link.setTextFill(Color.WHITE);
@@ -340,7 +339,7 @@ public class AbstractFXMLController {
     link.setOnAction(e -> features.sendTextOut("/requestfile " + extractName(msg) + ":" + filename));
     surface.getChildren().add(name);
     surface.getChildren().add(link);
-    surface.setPrefWidth(name.prefWidth(-1) + link.prefWidth(-1) + 10);
+    surface.setPrefWidth(new Text(extractName(msg) + ": " + filename).prefWidth(-1) + 20);
     return surface;
   }
 
