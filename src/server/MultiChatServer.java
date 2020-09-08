@@ -82,6 +82,10 @@ public class MultiChatServer {
         switch (command) {
           case "exit":
             System.out.println("good");
+
+            for(PrintWriter writer : outputWriters) {
+              writer.println("SERVERCLOSE ");
+            }
             //send to all users its closing
             //maybe a timer?
             break;

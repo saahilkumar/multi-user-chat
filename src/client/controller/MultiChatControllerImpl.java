@@ -82,6 +82,8 @@ public class MultiChatControllerImpl implements MultiChatController, Feature {
         File file = view.showSaveDialog(line.substring(line.indexOf(":") + 1));
         long fileSize = Long.parseLong(line.substring(9, line.indexOf(":")));
         model.saveFile(file, fileSize);
+      } else if(line.startsWith("SERVERCLOSE")) {
+        view.displayError(false, "Server has closed!");
       } else if (line.startsWith("REQUESTEDNEWROOM ")) {
         try {
           MultiChatModel newModel = model.switchPorts(line.substring(17));
@@ -96,7 +98,8 @@ public class MultiChatControllerImpl implements MultiChatController, Feature {
       }
     }
 
-    view.dispose();
+//    view.dispose();
+    System.exit(1);
   }
 
   @Override

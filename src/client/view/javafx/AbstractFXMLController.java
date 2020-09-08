@@ -394,6 +394,7 @@ public class AbstractFXMLController {
       if (!remainRunningWhenClosed) {
         alert.setOnCloseRequest(e -> System.exit(1));
       }
+      alert.showAndWait();
     });
   }
 
