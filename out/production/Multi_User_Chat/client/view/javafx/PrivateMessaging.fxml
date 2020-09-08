@@ -35,8 +35,8 @@
             <padding>
               <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
-            <Button onAction="#openFileExplorer"> Upload Images </Button>
-            <Button> Upload Files </Button>
+            <Button onAction="#openImageExplorer"> Upload Images </Button>
+            <Button onAction="#openFileExplorer"> Upload Files </Button>
             <Button onAction = "#showEmotePanel"> Emotes </Button>
           </HBox>
           <ScrollPane prefHeight = "100"  prefWidth = "600" >

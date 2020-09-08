@@ -2,6 +2,8 @@ package client.view.javafx;
 
 import client.controller.Feature;
 import client.view.MultiChatView;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 import javafx.animation.TranslateTransition;
@@ -35,6 +37,9 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.util.Duration;
 
 public class AbstractFXMLController {
@@ -123,6 +128,52 @@ public class AbstractFXMLController {
     }
   }
 
+  protected void getFile(boolean isPrivate, Window window, String receiver, String sender) {
+    Platform.runLater(() -> {
+      FileChooser dialog = new FileChooser();
+      dialog.setTitle("Select a file to upload.");
+      File selected = dialog.showOpenDialog(window);
+      if (!(selected == null)) {
+        if (selected.length() < 25000000) {
+          try {
+            features.sendFile(selected.getName(), selected.length(), selected, isPrivate, receiver, sender);
+          } catch (IOException ioe) {
+            displayError(true, "Something went wrong with sending the file!");
+          }
+
+        } else {
+          appendChatLog("The file size cannot exceed 25mb", "orange", false, "MESSAGEHELP");
+        }
+      }
+    });
+  }
+
+  protected void getImage(boolean isPrivate, Window window, String receiver, String sender) {
+    Platform.runLater(() -> {
+      FileChooser dialog = new FileChooser();
+      dialog.getExtensionFilters().addAll(
+          new FileChooser.ExtensionFilter("All Images", "*.jpg", "*.png", "*.gif"),
+          new FileChooser.ExtensionFilter("PNG", "*.png"),
+          new FileChooser.ExtensionFilter("JPG", "*.jpg"),
+          new FileChooser.ExtensionFilter("GIF", "*.gif")
+      );
+      dialog.setTitle("Select a file to upload.");
+      File selected = dialog.showOpenDialog(window);
+      if (!(selected == null)) {
+        if (selected.length() < 25000000) {
+          try {
+            features.sendFile(selected.getName(), selected.length(), selected, isPrivate, receiver, sender);
+          } catch (IOException ioe) {
+            displayError(true, "Something went wrong with sending the file!");
+          }
+
+        } else {
+          appendChatLog("The file size cannot exceed 25mb", "orange", false, "MESSAGEHELP");
+        }
+      }
+    });
+  }
+
   protected void appendChatLog(String s, String color, boolean hasDate, String protocol) {
     if (hasDate) {
       appendMessage(formatDate(s), getColor(color), hasDate, protocol);
@@ -150,7 +201,7 @@ public class AbstractFXMLController {
       messageContainer.setMaxWidth(Double.MAX_VALUE); //the stackpane fills to the width of chatlog
       bubbleWithMsg.setMaxWidth(Double.MAX_VALUE);
 
-      if (!protocol.equals("MESSAGE") && !protocol.equals("WHISPER") && !protocol.equals("FILE") && !protocol.equals("PRIVATEMESSAGE")) {
+      if (!protocol.equals("MESSAGE") && !protocol.equals("WHISPER") && !protocol.equals("FILE") && !protocol.equals("PRIVATEMESSAGE") && !protocol.equals("PRIVATEFILE")) {
         messageContainer.setAlignment(Pos.CENTER); //if it is not user text, center it (ie. black text messages)
         bubbleWithMsg.setAlignment(Pos.CENTER); //if it is not user text, center it (ie. black text messages)
       } else if (extractName(msg).equals(features.getClientUsername())) {
@@ -164,7 +215,7 @@ public class AbstractFXMLController {
       }
 
       HBox surface;
-      if(protocol.equals("FILE")) {
+      if(protocol.equals("FILE") || protocol.equals("PRIVATEFILE")) {
         surface = createHyperLink(msg);
       } else {
         surface = textMessageWithImages(words, c); //contains the texts and images sent
@@ -302,7 +353,7 @@ public class AbstractFXMLController {
 
     rect.setArcWidth(20);
     rect.setArcHeight(20);
-    if (protocol.equals("MESSAGE") || protocol.equals("FILE") || protocol.equals("PRIVATEMESSAGE")) {
+    if (protocol.equals("MESSAGE") || protocol.equals("FILE") || protocol.equals("PRIVATEMESSAGE") || protocol.equals("PRIVATEFILE")) {
       if (extractName(msg).equals(features.getClientUsername())) {
         rect.setFill(Color.CORNFLOWERBLUE);
       } else {

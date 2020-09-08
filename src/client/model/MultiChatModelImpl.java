@@ -156,6 +156,23 @@ public class MultiChatModelImpl implements MultiChatModel {
   }
 
   @Override
+  public void sendPrivateFile(String fileName, long fileSize, File file, String receiver, String sender) throws IOException {
+    System.out.println("/privatefile " + fileName + ":" + fileSize);
+    out.println("/privatefile " + receiver + ":" + fileName + ":" + fileSize);
+    FileInputStream fis = new FileInputStream(file);
+    BufferedInputStream bis = new BufferedInputStream(fis);
+    byte[] buffer = new byte[4096];
+    int amountRead;
+    while((amountRead = bis.read(buffer, 0, buffer.length)) > -1) {
+      socket.getOutputStream().write(buffer, 0, amountRead);
+    }
+
+    socket.getOutputStream().flush();
+    bis.close();
+    fis.close();
+  }
+
+  @Override
   public void saveFile(File file, long fileSize) {
     try {
       if (file != null) {

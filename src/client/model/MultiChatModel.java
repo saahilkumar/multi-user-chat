@@ -20,5 +20,7 @@ public interface MultiChatModel {
 
   void sendFile(String fileName, long fileSize, File file) throws IOException;
 
+  void sendPrivateFile(String fileName, long fileSize, File file, String receiver, String sender) throws IOException;
+
   void saveFile(File file, long fileSize);
 }

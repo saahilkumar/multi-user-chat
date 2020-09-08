@@ -288,6 +288,12 @@ public class MultiChatServer {
           Long fileSize = Long.parseLong(input.substring(input.lastIndexOf(":") + 1));
           System.out.println("Receiving file: " + fileName);
           outputFile(fileName, fileSize);
+        } else if(input.toLowerCase().startsWith("/privatefile ")) {
+          String fileReceiver = input.substring(13, input.indexOf(":"));
+          String fileName = input.substring(input.indexOf(":") + 1, input.lastIndexOf(":"));
+          Long fileSize = Long.parseLong(input.substring(input.lastIndexOf(":") + 1));
+          System.out.println("Receiving private file: " + fileName);
+          outputPrivateFile(fileName, fileSize, fileReceiver);
         } else if(input.toLowerCase().startsWith("/requestfile ")) {
           try {
             String fileOwner = input.substring(13, input.indexOf(":"));
@@ -481,15 +487,45 @@ public class MultiChatServer {
           fileSize -= buf.length;
         }
         fos.close();
+
         for(PrintWriter writer : outputWriters) {
           writer.println("FILE " + "[" + new Date() + "] " + name + ": " + fileName);
         }
+
       } catch(FileNotFoundException fnfe) {
         out.println("FAILEDFILETRANSFER Improper file name");
       } catch(IOException ioe) {
         out.println("FAILEDFILETRANSFER Error communicating with server");
       }
     }
+
+    private void outputPrivateFile(String fileName, long fileSize, String reciever) {
+      try {
+        byte[] buf = new byte[4096];
+        File file = new File("resources/tempFiles/" + name + "/" + fileName);
+        file.createNewFile();
+        FileOutputStream fos = new FileOutputStream(file);
+        while(fileSize > 0 && clientSocket.getInputStream().read(buf, 0, (int)Math.min(buf.length, fileSize)) > -1) {
+          fos.write(buf, 0, buf.length);
+          fos.flush();
+          fileSize -= buf.length;
+        }
+        fos.close();
+
+        users.get(reciever).out.println("PRIVATEFILE " + "[" + new Date() + "] " + name + ": " + reciever + ": " + fileName);
+        out.println("PRIVATEFILE " + "[" + new Date() + "] " + name + ": " + reciever + ": " + fileName);
+
+//        for(PrintWriter writer : outputWriters) {
+//          writer.println("FILE " + "[" + new Date() + "] " + name + ": " + fileName);
+//        }
+
+      } catch(FileNotFoundException fnfe) {
+        out.println("FAILEDFILETRANSFER Improper file name");
+      } catch(IOException ioe) {
+        out.println("FAILEDFILETRANSFER Error communicating with server");
+      }
+    }
+
 
     private void updateActiveUsers() {
       for (PrintWriter writer : outputWriters) {

@@ -93,7 +93,7 @@ public class FXMLController extends AbstractFXMLController {
     if (features.getClientUsername().equals(extractName(s))) {
       color = "white";
     }
-    if (protocol.equals("PRIVATEMESSAGE")) {
+    if (protocol.equals("PRIVATEMESSAGE") || protocol.equals("PRIVATEFILE")) {
       appendPrivateChatLog(s, color, hasDate, protocol);
     } else {
       super.appendChatLog(s, color, hasDate, protocol);
@@ -176,50 +176,52 @@ public class FXMLController extends AbstractFXMLController {
 
   @FXML
   private void openFileExplorer() {
-    Platform.runLater(() -> {
-      FileChooser dialog = new FileChooser();
-      dialog.setTitle("Select a file to upload.");
-      File selected = dialog.showOpenDialog(scene.getWindow());
-      if (!(selected == null)) {
-        if (selected.length() < 25000000) {
-          try {
-            features.sendFile(selected.getName(), selected.length(), selected);
-          } catch (IOException ioe) {
-            displayError(true, "Something went wrong with sending the file!");
-          }
-
-        } else {
-          appendChatLog("The file size cannot exceed 25mb", "orange", false, "MESSAGEHELP");
-        }
-      }
-    });
+//    Platform.runLater(() -> {
+//      FileChooser dialog = new FileChooser();
+//      dialog.setTitle("Select a file to upload.");
+//      File selected = dialog.showOpenDialog(scene.getWindow());
+//      if (!(selected == null)) {
+//        if (selected.length() < 25000000) {
+//          try {
+//            features.sendFile(selected.getName(), selected.length(), selected);
+//          } catch (IOException ioe) {
+//            displayError(true, "Something went wrong with sending the file!");
+//          }
+//
+//        } else {
+//          appendChatLog("The file size cannot exceed 25mb", "orange", false, "MESSAGEHELP");
+//        }
+//      }
+//    });
+    getFile(false, scene.getWindow(), null, null);
   }
 
   @FXML
   private void openImageExplorer() {
-    Platform.runLater(() -> {
-      FileChooser dialog = new FileChooser();
-      dialog.getExtensionFilters().addAll(
-          new FileChooser.ExtensionFilter("All Images", "*.jpg", "*.png", "*.gif"),
-          new FileChooser.ExtensionFilter("PNG", "*.png"),
-          new FileChooser.ExtensionFilter("JPG", "*.jpg"),
-          new FileChooser.ExtensionFilter("GIF", "*.gif")
-      );
-      dialog.setTitle("Select a file to upload.");
-      File selected = dialog.showOpenDialog(scene.getWindow());
-      if (!(selected == null)) {
-        if (selected.length() < 25000000) {
-          try {
-            features.sendFile(selected.getName(), selected.length(), selected);
-          } catch (IOException ioe) {
-            displayError(true, "Something went wrong with sending the file!");
-          }
-
-        } else {
-          appendChatLog("The file size cannot exceed 25mb", "orange", false, "MESSAGEHELP");
-        }
-      }
-    });
+//    Platform.runLater(() -> {
+//      FileChooser dialog = new FileChooser();
+//      dialog.getExtensionFilters().addAll(
+//          new FileChooser.ExtensionFilter("All Images", "*.jpg", "*.png", "*.gif"),
+//          new FileChooser.ExtensionFilter("PNG", "*.png"),
+//          new FileChooser.ExtensionFilter("JPG", "*.jpg"),
+//          new FileChooser.ExtensionFilter("GIF", "*.gif")
+//      );
+//      dialog.setTitle("Select a file to upload.");
+//      File selected = dialog.showOpenDialog(scene.getWindow());
+//      if (!(selected == null)) {
+//        if (selected.length() < 25000000) {
+//          try {
+//            features.sendFile(selected.getName(), selected.length(), selected);
+//          } catch (IOException ioe) {
+//            displayError(true, "Something went wrong with sending the file!");
+//          }
+//
+//        } else {
+//          appendChatLog("The file size cannot exceed 25mb", "orange", false, "MESSAGEHELP");
+//        }
+//      }
+//    });
+    getImage(false, scene.getWindow(), null, null);
   }
 
   private void openPrivateMessagingWindow(String receiver) {

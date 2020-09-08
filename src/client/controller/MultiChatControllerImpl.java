@@ -74,6 +74,8 @@ public class MultiChatControllerImpl implements MultiChatController, Feature {
         view.appendChatLog(line.substring(15), "black", true, "PRIVATEMESSAGE");
       } else if(line.startsWith("FILE ")) {
         view.appendChatLog(line.substring(5), "black", true, "FILE");
+      } else if(line.startsWith("PRIVATEFILE ")) {
+        view.appendChatLog(line.substring(12), "black", true, "PRIVATEFILE");
       } else if(line.startsWith("FAILEDFILETRANSFER ")) {
         view.appendChatLog(line.substring(19), "red", false, "FAILEDFILETRANSFER");
       } else if(line.startsWith("FILEDATA ")) {
@@ -108,7 +110,11 @@ public class MultiChatControllerImpl implements MultiChatController, Feature {
   }
 
   @Override
-  public void sendFile(String fileName, long fileSize, File file) throws IOException {
-    model.sendFile(fileName, fileSize, file);
+  public void sendFile(String fileName, long fileSize, File file, boolean isPrivate, String receiver, String sender) throws IOException {
+    if(isPrivate) {
+      model.sendPrivateFile(fileName, fileSize, file, receiver, sender);
+    } else {
+      model.sendFile(fileName, fileSize, file);
+    }
   }
 }
