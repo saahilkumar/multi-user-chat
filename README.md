@@ -5,6 +5,7 @@ A guide on how to install MultiChat will be coming soon.
 MultiChat comes with several fun features to make chatting a more enjoyable experience. 
 ### Emotes
 Like many other chatting applications, MultiChat supports the use of emojis in messages. However, what sets MultiChat apart is that it has support for Twitch emotes as well. Emotes such as PepeHands and FeelsGoodMan can be put into messages simply by typing out their name. Gif emotes, such as pepeD, work as well.
+![A message with emotes](./images/emote_message.png)
 
 If you wish to send an emote without typing its name, you can use the custom emoji keyboard which contains all the emotes supported by MultiChat.
 ### Whispers
