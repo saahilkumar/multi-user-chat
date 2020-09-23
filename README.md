@@ -1,7 +1,21 @@
 # MultiChat - A Chatting Application Using Java Sockets
+A chatting application with a dedicated GUI client and servers, operating on TLS protocols. MultiChat is a room chatting application with a modern look and features such file transferring, emotes, and private messaging.
+
+## Motivation
+This project was an opportunity to learn the server-client model and apply the Object Oriented Programming designs from class. The experimentation and research had some serendipitous lessons such as UI/UX design, the Internet layers, and a newfound appreciation for CSS! Also it helped with the quarantine cabin fever ;p
+
+## Screenshots
+
+![Private message example with settings panel](./images/privatemessage-settings-example.PNG)  
+![MultiChat example](./images/multichat_example.PNG)  
+
 ## Installation
 A guide on how to install MultiChat will be coming soon. 
-## Usage
+
+## Libraries Used
+JavaFX is used to provide the GUI view of the client. The Java Swing library was used but is now deprecated. Switching between the JavaFX and Java Swing libraries presented a unique challenge when trying to grab JavaFX instance for the controller object, but was overall painless with the MVC design.
+
+## Features
 MultiChat comes with several fun features to make chatting a more enjoyable experience. 
 
 ### Emotes
@@ -32,3 +46,18 @@ MultiChat also supports sending images and files within either a group or privat
 While MultiChat is primarily a group-focused chatting application, it still has support for private messaging. When another user privately messages you, a new chat window will pop up and show you their message. 
 
 ![A private message](./images/pm_example.png)
+
+## Usage
+
+### For the provider
+1.) Run MultiChatMasterServer  
+    This server keeps track of all active MultiChatServers and will update every server when one becomes active or inactive.  
+2.) Run MultiChatServer (as many instances as you want)  
+    This server serves the clients and acts as the room for the clients to connect in. Run this with command line arguments specifying the amount of users that can connect to this server (room) and specifying what port to use. There are also basic commands to manage the server while its running in the terminal: receiving the list of all active servers, all active users, and closing the server (removing any client sentfiles and ending the connection).  
+3.) Port Foward
+    Instruct your route to recognize and route any requests to your specified port to the server.  
+4.) Construct a .jar file for your clients  
+    Construct a .jar file for your clients with the arguments specifying the server's public IP address and the port number you want to be the default (welcome) room.  
+
+### For the users  
+1.) Run the .jar file!  
