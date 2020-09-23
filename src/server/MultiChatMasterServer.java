@@ -10,11 +10,26 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * A master server that keeps track of active MultiChat servers and updates the
+ * list of active servers every time there is a change to the list.
+ */
 public class MultiChatMasterServer {
 
+  // list of active MultiChat servers running and connected to this server
   private static Set<String> activeServers = new HashSet<>();
+
+  // the set of writers of the output streams to every MultiChat server
   private static Set<PrintWriter> outputWriters = new HashSet<>();
 
+  /**
+   * Runs this master server and runs a function object for every server connection to this master server.
+   * Every server connected to this master server is added to the list of servers connected to it.
+   *
+   * @param args command line arguments, first argument describes the amount of active MultiChat
+   *             servers that can possibly run at one time
+   * @throws IOException throws when a connection to a MultiChatServer's socket fails
+   */
   public static void main(String[] args) throws IOException {
     System.out.println("MultiChat Master Server is running...");
     ExecutorService pool = Executors.newFixedThreadPool(10);
@@ -25,10 +40,11 @@ public class MultiChatMasterServer {
     }
   }
 
+  // a function object that stores the task that every thread runs for each new server connection
   private static class ServerCommunicationHandler implements Runnable {
     private Socket multiChatServerClientSocket;
-    private Scanner in; //the input of the server
-    private PrintWriter out; //the output to the server
+    private Scanner in; // the input of the server
+    private PrintWriter out; // the output to the server
     private String serverPortName;
 
     private ServerCommunicationHandler(Socket multiChatServerClientSocket) {
@@ -47,6 +63,8 @@ public class MultiChatMasterServer {
       }
     }
 
+    // checks whether the server is running, if it is not then it removes the server
+    // from the list of active servers
     private void checkServerRunning() throws IOException {
       while(true) {
         try {
@@ -61,12 +79,13 @@ public class MultiChatMasterServer {
       }
     }
 
-    //Wraps the clients input and outputs streams into a Scanner and PrintWriter respectively.
+    // Wraps the clients input and outputs streams into a Scanner and PrintWriter respectively.
     private void wrapClientIO() throws IOException {
       in = new Scanner(multiChatServerClientSocket.getInputStream());
       out = new PrintWriter(multiChatServerClientSocket.getOutputStream(), true);
     }
 
+    // adds a server to the active server list
     private void addServer() {
       synchronized(activeServers) {
         String input = in.nextLine();
@@ -77,6 +96,7 @@ public class MultiChatMasterServer {
       updateServerList();
     }
 
+    // writes to all the active servers an updated version of the list
     private void updateServerList() {
       for (PrintWriter output : outputWriters) {
         StringBuilder serverListBuilder = new StringBuilder();
