@@ -6,8 +6,8 @@ This project was an opportunity to learn the server-client model and apply the O
 
 ## Screenshots
 
-![Private message example with settings panel](./images/privatemessage-settings-example.PNG)  
-![MultiChat example](./images/multichat_example.PNG)  
+![Private message example with settings panel](./images/privatemessage-settings-example.png)  
+![MultiChat example](./images/multichat_example.png)  
 
 ## Installation
 A guide on how to install MultiChat will be coming soon. 
